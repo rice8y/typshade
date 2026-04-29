@@ -1,6 +1,6 @@
 #import "@local/typshade:0.1.0": *
 
-#set document(title: "Typshade Documentation", author: "Yoneyama")
+#set document(title: "Typshade Documentation", author: "Eito Yoneyama")
 #set page(
   paper: "a4",
   margin: (x: 28mm, y: 25mm),
