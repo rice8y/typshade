@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create distribution folder
+        shell: bash
+        run: |
+          mkdir -p dist/typshade
+          cp -R package/. dist/typshade/
+
+      - name: Compress package
+        shell: bash
+        run: |
+          cd dist
+          zip -r "../typshade-${{ github.ref_name }}.zip" typshade
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: typshade-${{ github.ref_name }}.zip
+          generate_release_notes: true
