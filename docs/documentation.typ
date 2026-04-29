@@ -69,9 +69,9 @@
   #v(0.35em)
   #text(size: 11pt)[Version #get-version.package.version]
   #v(0.25em)
-  #text(size: 10pt)[Yoneyama]
+  #text(size: 10pt)[Eito Yoneyama]
   #v(0.25em)
-  #text(size: 10pt)[April 26, 2026]
+  #text(size: 10pt)[#datetime.today().display()]
   #v(0.7em)
   #line(length: 58%, stroke: 0.45pt + black)
 ]
