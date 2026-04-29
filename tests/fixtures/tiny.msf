@@ -1,0 +1,11 @@
+Tiny.MSF  MSF: 4   Type: P  Check: 0 ..
+
+Name: Alpha  Len: 4  Check: 0  Weight: 1.00
+!Name: Hidden  Len: 4  Check: 0  Weight: 1.00
+Name: Beta  Len: 4  Check: 0  Weight: 1.00
+
+//
+          1 4
+Alpha   AEF-
+Hidden  WWWW
+Beta    ADF-
