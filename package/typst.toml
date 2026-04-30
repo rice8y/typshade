@@ -2,9 +2,9 @@
 name = "typshade"
 version = "0.1.0"
 entrypoint = "lib.typ"
-authors = ["Yoneyama"]
+authors = ["Eito Yoneyama"]
 license = "GPL-2.0"
-description = "Typst-native multiple-sequence alignment figures for bioinformatics."
+description = "Multiple-sequence alignment figures for bioinformatics."
 keywords = ["bioinformatics", "alignment", "sequence", "visualization"]
 categories = ["visualization", "components"]
 compiler = "0.13.0"
