@@ -2,16 +2,11 @@
 
 ![Typshade alignment overview](package/images/readme-overview.png)
 
-Typst-native multiple-sequence alignment figures for bioinformatics.
+Typshade is a Typst package for visualizing multiple sequence alignments in bioinformatics.
 
-The primary API is `shade(...)`: a readable, Typst-shaped interface for
-alignment rendering, annotation, logos, structure tracks, and graph tracks.
+It provides a Typst-native interface centered on `shade(...)`, offering a readable and composable way to render alignments, add annotations, and incorporate logos, structure tracks, and graph tracks.
 
-Typshade is an independent Typst-native implementation inspired by Eric
-Beitz's TeXshade package. If your publication relies on TeXshade-compatible
-alignment shading or labeling behavior, please cite: Eric Beitz (2000),
-TeXshade: shading and labeling multiple sequence alignments using LaTeX 2e.
-Bioinformatics 16, 135-139.
+Inspired by TeXshade, Typshade rethinks alignment visualization with a focus on clarity, composability, and a Typst-native user experience.
 
 ## Why Typshade?
 
