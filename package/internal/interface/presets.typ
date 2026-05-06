@@ -55,7 +55,7 @@
   if settings.at("legend", default: none) != none {
     out.push(_config.legend-color(settings.at("legend")))
   }
-  _commands._add-command(out, settings.at("commands", default: ()))
+  out = _commands._add-command(out, settings.at("commands", default: ()))
   out
 }
 

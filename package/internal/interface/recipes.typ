@@ -219,6 +219,7 @@
   if threshold != none {
     out.push(_config.threshold(threshold))
   }
+  out
 }
 
 #let _apply-window(out, region, sequence, start: none) = {
@@ -233,11 +234,12 @@
       out.push(_config.sequence-window(sequence, region, start: start))
     }
   }
+  out
 }
 
 #let _apply-ruler(out, value, sequence, every) = {
   if value == false or value == none {
-    return
+    return out
   }
   let position = _track-position(value, "top")
   let steps = _value(value, "every", _value(value, "steps", every))
@@ -250,27 +252,29 @@
   if _value(value, "name", none) != none {
     out.push(_config.ruler-name(_value(value, "name", none), position: position))
   }
+  out
 }
 
 #let _apply-consensus(out, value) = {
   if value == false or value == none {
-    return
+    return out
   }
   out.push(_config.consensus-track(
     position: _track-position(value, "bottom"),
     scale: _value(value, "scale", none),
     name: _value(value, "name", none),
   ))
+  out
 }
 
 #let _apply-logo(out, value) = {
   if value == false or value == none {
-    return
+    return out
   }
   if value == true or type(value) == str {
-    _add(out, sequence-logo(position: "top", colors: if value == true { none } else { value }))
+    out = _add(out, sequence-logo(position: "top", colors: if value == true { none } else { value }))
   } else if type(value) == dictionary {
-    _add(out, sequence-logo(
+    out = _add(out, sequence-logo(
       position: value.at("position", default: "top"),
       colors: value.at("colors", default: value.at("colorset", default: none)),
       name: value.at("name", default: none),
@@ -279,15 +283,16 @@
       stretch: value.at("stretch", default: none),
     ))
   }
+  out
 }
 
 #let _annotation-selection(item, default) = item.at("selection", default: item.at("range", default: item.at("pattern", default: default)))
 
 #let _add-motif(out, pattern, settings, sequence, position) = {
   if type(settings) == str {
-    _add(out, _annotations.motif(sequence, pattern, text: settings, position: position))
+    out = _add(out, _annotations.motif(sequence, pattern, text: settings, position: position))
   } else if type(settings) == dictionary {
-    _add(out, _annotations.motif(
+    out = _add(out, _annotations.motif(
       settings.at("sequence", default: sequence),
       pattern,
       text: settings.at("text", default: settings.at("label", default: "motif")),
@@ -298,24 +303,25 @@
       all: settings.at("all", default: false),
     ))
   } else if settings == true {
-    _add(out, _annotations.motif(sequence, pattern, position: position))
+    out = _add(out, _annotations.motif(sequence, pattern, position: position))
   }
+  out
 }
 
 #let _apply-motifs(out, motifs, sequence, position: "top") = {
   if motifs == none {
-    return
+    return out
   }
   if type(motifs) == dictionary {
     for pattern in motifs.keys() {
-      _add-motif(out, pattern, motifs.at(pattern), sequence, position)
+      out = _add-motif(out, pattern, motifs.at(pattern), sequence, position)
     }
   } else if type(motifs) == array {
     for item in motifs {
       if type(item) == str {
-        _add(out, _annotations.motif(sequence, item, position: position))
+        out = _add(out, _annotations.motif(sequence, item, position: position))
       } else if type(item) == dictionary {
-        _add-motif(
+        out = _add-motif(
           out,
           _annotation-selection(item, "all"),
           item,
@@ -323,15 +329,16 @@
           item.at("position", default: position),
         )
       } else {
-        _add(out, item)
+        out = _add(out, item)
       }
     }
   }
+  out
 }
 
 #let _add-highlight(out, selection, settings, sequence) = {
   if type(settings) == dictionary {
-    _add(out, _annotations.highlight(
+    out = _add(out, _annotations.highlight(
       settings.at("sequence", default: sequence),
       selection,
       fg: settings.at("fg", default: "White"),
@@ -339,31 +346,33 @@
       all: settings.at("all", default: false),
     ))
   } else if settings == true {
-    _add(out, _annotations.highlight(sequence, selection))
+    out = _add(out, _annotations.highlight(sequence, selection))
   } else if type(settings) == str {
-    _add(out, _annotations.highlight(sequence, selection, bg: settings))
+    out = _add(out, _annotations.highlight(sequence, selection, bg: settings))
   }
+  out
 }
 
 #let _apply-highlights(out, highlights, sequence) = {
   if highlights == none {
-    return
+    return out
   }
   if type(highlights) == dictionary {
     for selection in highlights.keys() {
-      _add-highlight(out, selection, highlights.at(selection), sequence)
+      out = _add-highlight(out, selection, highlights.at(selection), sequence)
     }
   } else if type(highlights) == array {
     for item in highlights {
       if type(item) == str {
-        _add(out, _annotations.highlight(sequence, item))
+        out = _add(out, _annotations.highlight(sequence, item))
       } else if type(item) == dictionary {
-        _add-highlight(out, _annotation-selection(item, "all"), item, sequence)
+        out = _add-highlight(out, _annotation-selection(item, "all"), item, sequence)
       } else {
-        _add(out, item)
+        out = _add(out, item)
       }
     }
   }
+  out
 }
 
 #let publication(
@@ -415,20 +424,20 @@
   let conservation = _auto-conservation(alignment, options.at("conservation"))
   let logo = _auto-logo(alignment, options.at("logo"), region: region)
   let out = ()
-  _add(out, shade-preset("publication"))
-  _add(out, shade-theme(options.at("theme")))
-  _apply-scoring(out, mode, similarity, threshold)
+  out = _add(out, shade-preset("publication"))
+  out = _add(out, shade-theme(options.at("theme")))
+  out = _apply-scoring(out, mode, similarity, threshold)
   if line-length != none {
     out.push(_config.residues-per-line(line-length))
   }
-  _apply-window(out, region, sequence)
-  _apply-ruler(out, options.at("ruler"), sequence, options.at("every"))
-  _apply-consensus(out, conservation)
-  _apply-logo(out, logo)
-  _apply-highlights(out, options.at("highlights"), sequence)
-  _apply-motifs(out, motifs, sequence)
-  _add(out, options.at("annotations"))
-  _add(out, options.at("commands"))
+  out = _apply-window(out, region, sequence)
+  out = _apply-ruler(out, options.at("ruler"), sequence, options.at("every"))
+  out = _apply-consensus(out, conservation)
+  out = _apply-logo(out, logo)
+  out = _apply-highlights(out, options.at("highlights"), sequence)
+  out = _apply-motifs(out, motifs, sequence)
+  out = _add(out, options.at("annotations"))
+  out = _add(out, options.at("commands"))
   out
 }
 
@@ -484,7 +493,7 @@
   let graph = if options.at("graph") == auto { alignment.at("sequences").len() >= 3 } else { options.at("graph") }
   if graph != false {
     if type(graph) == dictionary {
-      _add(out, _annotations.graph(
+      out = _add(out, _annotations.graph(
         graph.at("position", default: "bottom"),
         graph.at("sequence", default: sequence),
         graph.at("selection", default: graph.at("range", default: "all")),
@@ -493,10 +502,10 @@
         options: graph.at("options", default: ("ColdHot",)),
       ))
     } else {
-      _add(out, _annotations.graph("bottom", sequence, "all", "conservation", kind: "color", options: ("ColdHot",)))
+      out = _add(out, _annotations.graph("bottom", sequence, "all", "conservation", kind: "color", options: ("ColdHot",)))
     }
   }
-  _add(out, options.at("commands"))
+  out = _add(out, options.at("commands"))
   out
 }
 
@@ -541,23 +550,23 @@
   let threshold = if options.at("threshold") == auto { none } else { options.at("threshold") }
   let conservation = _auto-conservation(alignment, options.at("conservation"))
   let out = ()
-  _add(out, shade-preset("structure"))
-  _add(out, shade-theme(options.at("theme")))
-  _apply-scoring(out, "similar", options.at("similarity"), threshold)
+  out = _add(out, shade-preset("structure"))
+  out = _add(out, shade-theme(options.at("theme")))
+  out = _apply-scoring(out, "similar", options.at("similarity"), threshold)
   if line-length != none {
     out.push(_config.residues-per-line(line-length))
   }
-  _apply-window(out, region, sequence)
-  _apply-ruler(out, options.at("ruler"), sequence, 10)
-  _apply-consensus(out, conservation)
-  _add(out, structure-tracks(
+  out = _apply-window(out, region, sequence)
+  out = _apply-ruler(out, options.at("ruler"), sequence, 10)
+  out = _apply-consensus(out, conservation)
+  out = _add(out, structure-tracks(
     sequence,
     hmmtop: options.at("hmmtop"),
     topology: options.at("topology"),
     secondary: options.at("secondary"),
     hmmtop-sequence: options.at("hmmtop-sequence"),
   ))
-  _add(out, options.at("commands"))
+  out = _add(out, options.at("commands"))
   out
 }
 
@@ -600,13 +609,13 @@
   }
   let conservation = _auto-conservation(alignment, options.at("conservation"))
   let out = ()
-  _add(out, shade-preset("logo"))
-  _add(out, shade-theme(options.at("theme")))
+  out = _add(out, shade-preset("logo"))
+  out = _add(out, shade-theme(options.at("theme")))
   if line-length != none {
     out.push(_config.residues-per-line(line-length))
   }
-  _apply-window(out, region, sequence)
-  _add(out, sequence-logo(position: "top", colors: colors))
+  out = _apply-window(out, region, sequence)
+  out = _add(out, sequence-logo(position: "top", colors: colors))
   if options.at("subfamily") != none {
     out.push(_config.subfamily(options.at("subfamily")))
     out.push(_config.subfamily-logo-track(position: "bottom", colorset: colors))
@@ -629,8 +638,8 @@
       out.push(_config.relevance-threshold(relevance))
     }
   }
-  _apply-consensus(out, conservation)
-  _add(out, options.at("commands"))
+  out = _apply-consensus(out, conservation)
+  out = _add(out, options.at("commands"))
   out
 }
 
@@ -663,9 +672,9 @@
     options.at("line-length")
   }
   let out = ()
-  _add(out, shade-preset("overview"))
-  _add(out, shade-theme(options.at("theme")))
-  _apply-scoring(out, options.at("mode"), options.at("colors"), none)
+  out = _add(out, shade-preset("overview"))
+  out = _add(out, shade-theme(options.at("theme")))
+  out = _apply-scoring(out, options.at("mode"), options.at("colors"), none)
   if line-length != none {
     out.push(_config.residues-per-line(line-length))
   }
@@ -679,9 +688,9 @@
   if numbers == true or type(numbers) == dictionary or type(numbers) == str {
     out.push(_config.numbering-track(position: _track-position(numbers, "right"), color: _value(numbers, "color", none)))
   }
-  _apply-consensus(out, options.at("conservation"))
-  _apply-ruler(out, options.at("ruler"), 1, 10)
-  _add(out, options.at("commands"))
+  out = _apply-consensus(out, options.at("conservation"))
+  out = _apply-ruler(out, options.at("ruler"), 1, 10)
+  out = _add(out, options.at("commands"))
   out
 }
 
@@ -715,9 +724,9 @@
   let alignment = if needs-alignment { read-alignment(source, format: format) } else { none }
   for item in items {
     if _is-recipe(item) {
-      _add(out, _build-recipe(alignment, item))
+      out = _add(out, _build-recipe(alignment, item))
     } else {
-      _add(out, item)
+      out = _add(out, item)
     }
   }
   out

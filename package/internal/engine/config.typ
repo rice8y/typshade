@@ -189,7 +189,7 @@
     char-stretch: 1.0,
     numbering-width-digits: 4,
     text-styles: _default-text-styles,
-    alignment: "center",
+    alignment: "left",
     align-right-labels: false,
     seq-type: none,
     show-leading-gaps: true,
@@ -1012,4 +1012,5 @@
   } else if kind == "feature-slot-space" {
     config.at("feature-slot-spacing").insert(command.at("position"), command.at("value"))
   }
+  config
 }

@@ -9,6 +9,15 @@
 #let _top-feature-slots = ("ttttop", "tttop", "ttop", "top")
 #let _bottom-feature-slots = ("bottom", "bbottom", "bbbottom", "bbbbottom")
 
+#let _array-position(items, value) = {
+  for (idx, item) in items.enumerate() {
+    if item == value {
+      return idx
+    }
+  }
+  none
+}
+
 #let _feature-label(config, position, text: false) = {
   let labels = if text { config.at("feature-text-names") } else { config.at("feature-style-names") }
   let colors = if text { config.at("feature-text-name-colors") } else { config.at("feature-style-name-colors") }
@@ -192,7 +201,7 @@
     codon-cols.push(col)
     if codon.len() == 3 {
       let center-col = codon-cols.at(1)
-      let target = segment.position(center-col)
+      let target = _array-position(segment, center-col)
       if target != none {
         cells.at(target).insert("char", _translate-codon(config, codon))
         cells.at(target).insert("fg", colors.at("fg"))
@@ -287,14 +296,9 @@
         labels.at(idx).insert("rotated", text)
         labels.at(idx).insert("fg", color)
       } else {
-        let start = calc.max(0, idx - text.len() + 1)
-        for (offset, ch) in _chars(text).enumerate() {
-          let target = start + offset
-          if target < labels.len() {
-            labels.at(target).insert("char", ch)
-            labels.at(target).insert("fg", color)
-          }
-        }
+        labels.at(idx).insert("char", "")
+        labels.at(idx).insert("ruler-label", text)
+        labels.at(idx).insert("fg", color)
       }
     }
   }

@@ -3,21 +3,22 @@
 
 #let _add-command(out, value) = {
   if value == none {
-    return
+    return out
   }
   if type(value) == array {
     for item in value {
-      _add-command(out, item)
+      out = _add-command(out, item)
     }
   } else {
     out.push(value)
   }
+  out
 }
 
 #let command-pack(..items) = {
   let out = ()
   for item in items.pos() {
-    _add-command(out, item)
+    out = _add-command(out, item)
   }
   out
 }

@@ -24,6 +24,17 @@
 #let _graph-scales = ("BlackWhite", "WhiteBlack", "BlueRed", "RedBlue", "GreenRed", "RedGreen", "ColdHot", "HotCold", "TCoffee")
 #let _builtin-graph-metrics = ("hydrophobicity", "molweight", "charge", "conservation")
 
+#let _array-position(items, value) = {
+  for (idx, item) in items.enumerate() {
+    if item == value {
+      return idx
+    }
+  }
+  none
+}
+
+#let _graph-is-stacked(parsed) = parsed.at("kind") == "stackedbars" or parsed.at("kind") == "frustratometer"
+
 #let _parse-number(value) = {
   let text = str(value).trim()
   if text == "" or text == "NaN" or text == "nan" {
@@ -262,10 +273,11 @@
 
 #let _graph-series(parsed, alignment, sequence, selected) = {
   let source = _graph-data-source(parsed)
+  let stacked = _graph-is-stacked(parsed)
   if source == "builtin" {
     let out = ()
     for col in selected {
-      if parsed.at("kind") == "stackedbars" {
+      if stacked {
         out.push((_builtin-graph-value(alignment, sequence, col, parsed.at("metric")),))
       } else {
         out.push(_builtin-graph-value(alignment, sequence, col, parsed.at("metric")))
@@ -274,11 +286,11 @@
     return out
   }
   let rows = if source == "inline" {
-    _parse-inline-graph-data(parsed.at("metric"), stacked: parsed.at("kind") == "stackedbars")
+    _parse-inline-graph-data(parsed.at("metric"), stacked: stacked)
   } else if source == "frustr" {
     _read-frustr-data(parsed.at("metric"))
   } else {
-    _read-graph-data(parsed.at("metric"), stacked: parsed.at("kind") == "stackedbars")
+    _read-graph-data(parsed.at("metric"), stacked: stacked)
   }
   let numbered = rows.any(row => row.at("position") != none)
   let out = ()
@@ -292,7 +304,7 @@
     for col in selected {
       let pos = sequence.at("positions").at(col)
       let values = if pos == none or not lookup.keys().contains(str(pos)) { () } else { lookup.at(str(pos)) }
-      if parsed.at("kind") == "stackedbars" {
+      if stacked {
         out.push(values)
       } else {
         out.push(if values.len() > 0 { values.first() } else { none })
@@ -302,9 +314,9 @@
     for idx in range(0, selected.len()) {
       if idx < rows.len() {
         let values = rows.at(idx).at("values")
-        out.push(if parsed.at("kind") == "stackedbars" { values } else { if values.len() > 0 { values.first() } else { none } })
+        out.push(if stacked { values } else { if values.len() > 0 { values.first() } else { none } })
       } else {
-        out.push(if parsed.at("kind") == "stackedbars" { () } else { none })
+        out.push(if stacked { () } else { none })
       }
     }
   }
@@ -413,7 +425,7 @@
   for _ in range(0, repeat) {
     let cells = ()
     for col in segment {
-      let idx = selected.position(col)
+      let idx = _array-position(selected, col)
       if idx == none {
         cells.push(_empty-cell())
       } else {
@@ -442,7 +454,7 @@
     let level = 1.0 - row / repeat
     let cells = ()
     for col in segment {
-      let idx = selected.position(col)
+      let idx = _array-position(selected, col)
       if idx == none {
         cells.push(_empty-cell())
       } else {
@@ -485,7 +497,7 @@
     let level = 1.0 - row / repeat
     let cells = ()
     for col in segment {
-      let idx = selected.position(col)
+      let idx = _array-position(selected, col)
       if idx == none {
         cells.push(_empty-cell())
       } else {

@@ -43,9 +43,9 @@
   font-size: none,
 ) = {
   let out = ()
-  _commands._add-command(out, _recipes.resolve-figure(source, format, figure))
-  _commands._add-command(out, shade-preset(preset))
-  _commands._add-command(out, shade-theme(theme))
+  out = _commands._add-command(out, _recipes.resolve-figure(source, format, figure))
+  out = _commands._add-command(out, shade-preset(preset))
+  out = _commands._add-command(out, shade-theme(theme))
   if seq-type != auto and seq-type != none {
     out.push(_config.sequence-type(seq-type))
   }
@@ -120,8 +120,8 @@
       out.push(_config.legend-track())
     }
   }
-  _commands._add-command(out, regions)
-  _commands._add-command(out, features)
-  _commands._add-command(out, commands)
+  out = _commands._add-command(out, regions)
+  out = _commands._add-command(out, features)
+  out = _commands._add-command(out, commands)
   _render.render-alignment(source, format: format, commands: out, font: font, font-size: font-size)
 }

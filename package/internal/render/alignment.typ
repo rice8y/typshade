@@ -8,7 +8,7 @@
 #import "logos.typ": _legend-block, _logo-block
 #import "../model/palette.typ": resolve-color, scale-color
 #import "../model/parser.typ": _array-fill, _chars, _lower, _upper, read-alignment
-#import "../model/text-style.typ": _text-params, _text-string
+#import "../model/text-style.typ": _font-size, _text-params, _text-string
 
 #let _display-columns(alignment, config) = {
   let selected = ()
@@ -608,7 +608,7 @@
   }
   if config.at("shading").at("mode") == "singleseq" {
     let ref = config.at("shading").at("reference", default: 1)
-    return (alignment.at("sequences").at(_resolve-sequence(alignment, ref)))
+    return (alignment.at("sequences").at(_resolve-sequence(alignment, ref)),)
   }
   if config.at("order") == none {
     return out
@@ -853,8 +853,14 @@
             #text(.._text-params(config, cell-target, fill: resolve-color(cell.at("fg"))))[#_text-string(config, cell-target, cell.at("rotated"))]
           ])
         ])
+      } else if cell.keys().contains("ruler-label") {
+        items.push(box(width: 100%, inset: 0pt)[
+          #align(center + horizon)[
+            #text(.._text-params(config, cell-target, fill: resolve-color(cell.at("fg"))))[#_text-string(config, cell-target, cell.at("ruler-label"))]
+          ]
+        ])
       } else {
-        items.push(text(.._text-params(config, cell-target, fill: resolve-color(cell.at("fg")), style: if cell.at("emph") { "italic" } else { auto }, size: cell.at("size", default: auto)))[#{
+        items.push(text(.._text-params(config, cell-target, fill: resolve-color(cell.at("fg")), style: if cell.at("emph") { "italic" } else { auto }, size: if cell.keys().contains("size") { _font-size(config, cell.at("size")) } else { auto }))[#{
           if hide-sequence-chars or (cell.at("char") == "." and not config.at("show-leading-gaps")) { "" } else { _text-string(config, cell-target, cell.at("char")) }
         }])
       }
@@ -872,7 +878,13 @@
     fills.push(row-fills)
     strokes.push(row-strokes)
   }
-  table(columns: columns, inset: (x: 2pt, y: 1pt), stroke: (x, y) => strokes.at(y).at(x), fill: (x, y) => fills.at(y).at(x), align: center, column-gutter: 0pt, row-gutter: config.at("line-gap"), ..items)
+  let table-width = 0pt
+  for column in columns {
+    table-width += column
+  }
+  box(width: table-width, inset: 0pt)[
+    #table(columns: columns, inset: (x: 2pt, y: 1pt), stroke: (x, y) => strokes.at(y).at(x), fill: (x, y) => fills.at(y).at(x), align: center, column-gutter: 0pt, row-gutter: config.at("line-gap"), ..items)
+  ]
 }
 
 #let _append-feature-blocks(rendered, alignment, config, segment, slots, name-width, num-width, cell-width) = {
@@ -885,6 +897,17 @@
         rendered.push(v(spacing, weak: false))
       }
     }
+  }
+}
+
+#let _alignment-edge(config) = {
+  let value = config.at("alignment")
+  if value == "left" {
+    left
+  } else if value == "right" {
+    right
+  } else {
+    center
   }
 }
 
@@ -901,7 +924,7 @@
       config.insert("residues-per-line", residues-per-line)
     }
     for command in commands {
-      _apply-command(config, command)
+      config = _apply-command(config, command)
     }
     let alignment = read-alignment(source, format: format)
     if config.at("seq-type") != none {
@@ -923,7 +946,6 @@
       blocks.push(display-columns.slice(start, stop))
       start = stop
     }
-    set align(if config.at("alignment") == "left" { left } else if config.at("alignment") == "right" { right } else { center })
     let rendered = ()
     if config.at("captions").at("top") != none {
       rendered.push(text(.._text-params(config, "legend"))[#config.at("captions").at("top")])
@@ -995,6 +1017,7 @@
     if config.at("captions").at("bottom") != none {
       rendered.push(text(.._text-params(config, "legend"))[#config.at("captions").at("bottom")])
     }
-    stack(spacing: config.at("block-gap"), ..rendered)
+    let edge = _alignment-edge(config)
+    stack(spacing: config.at("block-gap"), ..rendered.map(item => align(edge)[#item]))
   }
 }
