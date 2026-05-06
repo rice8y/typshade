@@ -1,4 +1,4 @@
-#import "@local/typshade:0.1.0": *
+#import "../package/lib.typ": *
 
 #set document(title: "Typshade Documentation", author: "Eito Yoneyama")
 #set page(
@@ -28,7 +28,10 @@
   radius: 2pt,
   inset: 6pt,
   below: 0.75em,
-)[#it]
+)[
+  #set text(size: 7.4pt)
+  #it
+]
 
 #let typshade-logo(size: 22pt) = {
   let logo-face = "New Computer Modern"
@@ -62,7 +65,28 @@
   ]
 ]
 
+#let example-result(body) = block(
+  width: 100%,
+  inset: 7pt,
+  fill: luma(252),
+  stroke: 0.35pt + luma(215),
+  radius: 2pt,
+  below: 0.9em,
+)[
+  #text(weight: "bold", size: 8.5pt)[Typeset result]
+  #v(4pt)
+  #{
+    set text(size: 6.8pt)
+    body
+  }
+]
+
 #let get-version = toml("../package/typst.toml")
+#let demo-protein = read("../tests/fixtures/reference/AQPpro.MSF", encoding: none)
+#let demo-dna = read("../tests/fixtures/reference/AQPDNA.MSF", encoding: none)
+#let demo-topology = read("../tests/fixtures/reference/AQP1.phd", encoding: none)
+#let demo-tiny-protein = read("../tests/fixtures/tiny-protein.fasta", encoding: none)
+#let demo-pdb = read("../tests/fixtures/tiny.pdb", encoding: none)
 
 #align(center)[
   #text(size: 18pt, weight: "bold")[#typshade-logo(size: 20pt) Documentation]
@@ -490,8 +514,11 @@ TeXshade-style figures translate into idiomatic Typshade source.
 Use identity shading when exact residue conservation is the focus.
 
 ```typst
+#let alignment = read("AQPpro.MSF", encoding: none)
+
 #shade(
-  "AQPpro.MSF",
+  alignment,
+  format: "msf",
   commands: (
     identical(colors: "blues", threshold: 50, all-match-threshold: 80),
     window(1, "80..112"),
@@ -501,12 +528,28 @@ Use identity shading when exact residue conservation is the focus.
 )
 ```
 
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      identical(colors: "blues", threshold: 50, all-match-threshold: 80),
+      window(1, "80..112"),
+      ruler("top", sequence: 1, every: 10),
+      no-consensus(),
+    ),
+  )
+]
+
 The same figure can be expressed as a recipe when the intent is a standard
 publication panel:
 
 ```typst
+#let alignment = read("AQPpro.MSF", encoding: none)
+
 #shade(
-  "AQPpro.MSF",
+  alignment,
+  format: "msf",
   figure: publication(
     mode: "identical",
     threshold: 50,
@@ -516,14 +559,31 @@ publication panel:
 )
 ```
 
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    figure: publication(
+      mode: "identical",
+      threshold: 50,
+      region: "80..112",
+      conservation: false,
+      logo: false,
+    ),
+  )
+]
+
 == Similarity Shading With Motif Labels
 
 Similarity shading is the default for many peptide alignments because it can
 highlight chemically similar residues even when exact identity is low.
 
 ```typst
+#let alignment = read("AQPpro.MSF", encoding: none)
+
 #shade(
-  "AQPpro.MSF",
+  alignment,
+  format: "msf",
   commands: (
     similar(colors: "blues", threshold: 45),
     window(1, "80..125"),
@@ -535,6 +595,21 @@ highlight chemically similar residues even when exact identity is low.
 )
 ```
 
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      similar(colors: "blues", threshold: 45),
+      window(1, "80..125"),
+      ruler("top", sequence: 1, every: 10),
+      consensus("bottom", name: "conservation"),
+      motif(1, "NPA", text: "NPA loop", fg: "White", bg: "BrickRed"),
+      motif(1, "NXX[ST]N", text: "glycosylation"),
+    ),
+  )
+]
+
 For exploratory documents, `motif-map(auto)` can discover common motifs and
 focus the displayed region automatically.
 
@@ -544,8 +619,11 @@ Functional shading groups residues by biochemical properties such as charge,
 hydropathy, chemical class, or side-chain area.
 
 ```typst
+#let alignment = read("AQPpro.MSF", encoding: none)
+
 #shade(
-  "AQPpro.MSF",
+  alignment,
+  format: "msf",
   commands: (
     functional("charge"),
     window(1, "138..170"),
@@ -554,6 +632,19 @@ hydropathy, chemical class, or side-chain area.
   ),
 )
 ```
+
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      functional("charge"),
+      window(1, "138..170"),
+      graph("top", 1, "138..170", "charge", kind: "color", options: ("ColdHot",)),
+      legend(),
+    ),
+  )
+]
 
 Custom functional modes are built from explicit group definitions:
 
@@ -570,6 +661,26 @@ Custom functional modes are built from explicit group definitions:
 
 #shade(alignment, format: "msf", commands: acidic-basic)
 ```
+
+#example-result[
+  #let acidic-basic = (
+    functional("custom"),
+    clear-functional-groups(),
+    functional-group("acidic (-)", "DE", "White", "Red"),
+    functional-group("basic (+)", "HKR", "White", "Blue"),
+    shade-all-residues(),
+  )
+
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      window(1, "138..170"),
+      acidic-basic,
+      legend(),
+    ),
+  )
+]
 
 == Sequence Logo Without Sequence Rows
 
@@ -593,6 +704,23 @@ sequences and keep the logo, conservation row, and ruler.
 )
 ```
 
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    figure: logo-analysis(
+      sequence: 3,
+      region: "203..235",
+      colors: "charge",
+      conservation: true,
+      commands: (
+        hide-all-sequences(),
+        ruler("bottom", sequence: 3, every: 5),
+      ),
+    ),
+  )
+]
+
 == Subfamily Logo
 
 Subfamily logos compare a selected set of sequences against the remaining
@@ -600,8 +728,11 @@ sequences. Relevance markers help identify positions with interpretable
 deviation.
 
 ```typst
+#let alignment = read("AQPpro.MSF", encoding: none)
+
 #shade(
-  "AQPpro.MSF",
+  alignment,
+  format: "msf",
   figure: logo-analysis(
     sequence: 3,
     region: "203..235",
@@ -615,6 +746,25 @@ deviation.
   ),
 )
 ```
+
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    figure: logo-analysis(
+      sequence: 3,
+      region: "203..235",
+      subfamily: (3,),
+      negative: true,
+      relevance: (threshold: 1.0, char: "*", color: "Black"),
+      commands: (
+        hide-all-sequences(),
+        subfamily-logo-name("AQP3", negative-name: "others"),
+        ruler("bottom", sequence: 3, every: 5),
+      ),
+    ),
+  )
+]
 
 == Structure And Topology Tracks
 
@@ -637,6 +787,20 @@ Structure tracks can be attached either manually or through `structure-map`.
 )
 ```
 
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    figure: structure-map(
+      1,
+      topology: demo-topology,
+      secondary: demo-topology,
+      region: "1..120",
+      line-length: 40,
+    ),
+  )
+]
+
 When exact filtering is needed, add controls:
 
 ```typst
@@ -648,11 +812,42 @@ When exact filtering is needed, add controls:
   format: "msf",
   commands: (
     structures(1, topology: topology),
-    show-structure-types("PHDtopo", ("TM", "internal", "external")),
-    structure-appearance("PHDtopo", "TM", "top", "box[Blue]:TM", ""),
+    show-structure-types(
+      "PHDtopo",
+      ("TM", "internal", "external"),
+    ),
+    structure-appearance(
+      "PHDtopo",
+      "TM",
+      "top",
+      "box[Blue]:TM",
+      "",
+    ),
   ),
 )
 ```
+
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      window(1, "1..80"),
+      structures(1, topology: demo-topology),
+      show-structure-types(
+        "PHDtopo",
+        ("TM", "internal", "external"),
+      ),
+      structure-appearance(
+        "PHDtopo",
+        "TM",
+        "top",
+        "box[Blue]:TM",
+        "",
+      ),
+    ),
+  )
+]
 
 == PDB-Based Selection
 
@@ -674,14 +869,31 @@ site without hand-transcribing residue numbers.
 )
 ```
 
+#example-result[
+  #shade(
+    demo-tiny-protein,
+    format: "fasta",
+    commands: (
+      similar(colors: "blues"),
+      ruler("top", sequence: 1, every: 1),
+      highlight(1, pdb-selection(pdb-point(demo-pdb, 1, distance: 0.2, atom: "CA")), bg: "Yellow"),
+      highlight(1, pdb-selection(pdb-line(demo-pdb, 1, 2, distance: 0.2, atom-a: "CA", atom-b: "CA")), bg: "LightGreen"),
+      no-consensus(),
+    ),
+  )
+]
+
 == Translation And Complement Features
 
 Single-sequence nucleotide figures can combine lowercased UTRs, complements,
 translations, and manual feature labels.
 
 ```typst
+#let alignment = read("AQPDNA.MSF", encoding: none)
+
 #shade(
-  "AQPDNA.MSF",
+  alignment,
+  format: "msf",
   seq-type: "N",
   commands: (
     single-sequence(sequence: 1),
@@ -693,6 +905,24 @@ translations, and manual feature labels.
   ),
 )
 ```
+
+#example-result[
+  #shade(
+    demo-dna,
+    format: "msf",
+    seq-type: "N",
+    commands: (
+      single-sequence(sequence: 1),
+      shift-single-sequence(),
+      window(1, "414..443"),
+      lower(1, "439..443"),
+      backtranslation-label("horizontal"),
+      mark("bottom", 1, "424..443", style: "complement[LightBlue][lower]", text: "complement"),
+      mark("top", 1, "414..443", style: "translate[Red]", text: "translation"),
+      no-consensus(),
+    ),
+  )
+]
 
 = Public API Layers
 
@@ -751,6 +981,21 @@ Smart defaults use the alignment data:
 )
 ```
 
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    figure: motif-map(
+      (
+        "NPA": (bg: "BrickRed", text: "active site"),
+        "NXX[ST]N": "glycosylation",
+      ),
+      region: "80..125",
+      logo: "charge",
+    ),
+  )
+]
+
 = Command Helpers
 
 `commands:` is useful when a recipe is too high-level and you want to assemble
@@ -775,8 +1020,11 @@ left-to-right order.
 == Example: Publication Figure
 
 ```typst
+#let alignment = read("alignment.msf", encoding: none)
+
 #shade(
-  "alignment.msf",
+  alignment,
+  format: "msf",
   preset: "publication",
   theme: "screen",
   commands: (
@@ -788,18 +1036,51 @@ left-to-right order.
 )
 ```
 
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    preset: "publication",
+    theme: "screen",
+    commands: (
+      similar(threshold: 45),
+      lines(50),
+      window(1, "80..125"),
+      ruler("top", sequence: 1, every: 10),
+      consensus("bottom", name: "conservation"),
+    ),
+  )
+]
+
 == Example: Motifs And Graphs
 
 ```typst
+#let alignment = read("alignment.msf", encoding: none)
+
 #shade(
-  "alignment.msf",
+  alignment,
+  format: "msf",
   commands: (
+    window(1, "80..125"),
     highlight(1, "NPA", bg: "BrickRed"),
     motif(1, "NXX[ST]N", text: "glycosylation"),
     graph("bottom", 1, "all", "conservation", kind: "color", options: ("ColdHot",)),
   ),
 )
 ```
+
+#example-result[
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      window(1, "80..125"),
+      highlight(1, "NPA", bg: "BrickRed"),
+      motif(1, "NXX[ST]N", text: "glycosylation"),
+      graph("bottom", 1, "all", "conservation", kind: "color", options: ("ColdHot",)),
+    ),
+  )
+]
 
 = Helper Function API
 
@@ -812,7 +1093,8 @@ Helper functions are useful when a figure is assembled from reusable fragments.
 )
 
 #shade(
-  "alignment.msf",
+  read("alignment.msf", encoding: none),
+  format: "msf",
   preset: "publication",
   theme: "screen",
   regions: active-site,
@@ -822,6 +1104,26 @@ Helper functions are useful when a figure is assembled from reusable fragments.
   ),
 )
 ```
+
+#example-result[
+  #let active-site = (
+    highlight(1, "NPA", fg: "White", bg: "BrickRed"),
+    motif(1, "NXX[ST]N", text: "motif"),
+  )
+
+  #shade(
+    demo-protein,
+    format: "msf",
+    preset: "publication",
+    theme: "screen",
+    regions: active-site,
+    commands: (
+      window(1, "80..125"),
+      scoring-mode("similar"),
+      ruler-track(position: "top", sequence: 1, steps: 10),
+    ),
+  )
+]
 
 = Detailed User Guide
 
@@ -877,6 +1179,11 @@ where each TeXshade command went.
   [`commands`], [Final explicit command list. Use this for low-level controls and final overrides.],
   [`font`, `font-size`], [Renderer-level fallback text settings. Prefer `typography` for targeted styling.],
 )
+
+By default, rendered alignment blocks are left-aligned. Use
+`alignment-position("center")` or `alignment-position("right")` only when a
+particular figure should be optically centered or flush-right inside its
+containing block.
 
 == Recipe Options
 
@@ -1205,7 +1512,7 @@ For new documents, prefer this order:
   [`numberingwidth`], [`numbering-width(digits)`], [`control`], [Reserves numbering column width.],
   [`charstretch`], [`character-stretch(value)`], [`control`], [Controls cell width/stretch.],
   [`linestretch`], [`line-stretch(value)`], [`control`], [Controls row height/stretch.],
-  [`alignment`], [`alignment-position(position)`], [`control`], [Controls alignment placement in its containing block.],
+  [`alignment`], [`alignment-position(position)`], [`control`], [Controls alignment placement in its containing block. Typshade defaults to `left`; accepted values are `"left"`, `"center"`, and `"right"`.],
   [`smallblockskip`, `medblockskip`, `bigblockskip`, `noblockskip`], [`small-block-gap()`, `medium-block-gap()`, `large-block-gap()`, `no-block-gap()`], [`control`], [Block gap sizes are deterministic Typst spacing commands.],
   [`vblockspace`], [`block-gap(value)`], [`control`], [Explicit block gap.],
   [`flexblockspace`, `fixblockspace`], [`flexible-block-gap()`, `fixed-block-gap()`], [`approx`], [Commands are represented, but TeX page-breaking glue semantics are not reproduced. Typst uses deterministic layout.],
@@ -1373,9 +1680,9 @@ of object you want to control but do not remember the exact helper name.
   [Presets and themes], [`shade-preset`, `shade-theme`, `visual-theme`, `resolve-color`, `scale-color`],
   [Inspection and data], [`alignment-data`, `parse-alignment`, `alignment-summary`, `selection-preview`, `sequence-list`, `selection-table`, `percent-identity`, `percent-similarity`, `similarity-table`],
   [Scoring shortcuts], [`identical`, `similar`, `diverse`, `functional`, `single-sequence`, `tcoffee`],
-  [Layout shortcuts], [`lines`, `window`, `names`, `no-names`, `numbers`, `no-numbers`, `typography`, `gap-style`],
+  [Layout shortcuts], [`lines`, `window`, `names`, `no-names`, `numbers`, `no-numbers`, `no-numbering`, `typography`, `gap-style`],
   [Track shortcuts], [`consensus`, `no-consensus`, `ruler`, `no-ruler`, `logo`, `no-logo`, `legend`, `no-legend`, `structures`],
-  [Track controls], [`consensus-track`, `ruler-track`, `ruler-marker`, `sequence-logo`, `subfamily-logo`, `legend-track`, `structure-tracks`],
+  [Track controls], [`consensus-track`, `ruler-track`, `ruler-marker`, `sequence-logo`, `no-sequence-logo`, `subfamily-logo`, `no-subfamily-logo`, `legend-track`, `structure-tracks`],
   [Annotations], [`highlight`, `tint`, `emphasize`, `mark`, `motif`, `graph`, `pdb-point`, `pdb-line`, `pdb-plane`],
   [Core controls], [`sequence-type`, `color-scheme`, `scoring-mode`, `tcoffee-scores`, `sequence-window`, `residues-per-line`, `threshold`],
   [Conservation controls], [`shade-all-residues`, `all-match-threshold`, `disable-all-match-threshold`, `hide-all-match-positions`, `show-all-match-positions`, `weight-table`, `set-weight`, `gap-penalty`],
@@ -1384,14 +1691,494 @@ of object you want to control but do not remember the exact helper name.
   [Consensus/ruler details], [`consensus-name`, `consensus-language`, `consensus-symbols`, `consensus-colors`, `consensus-from-sequence`, `consensus-from-all-sequences`, `ruler-steps`, `ruler-color`, `ruler-name`, `ruler-name-color`, `ruler-space`, `rotate-ruler`, `unrotate-ruler`],
   [Gap and sequence display], [`gap-char`, `gap-rule`, `gap-colors`, `stop-char`, `show-leading-gaps`, `hide-leading-gaps`, `hide-residues`, `show-residues`, `keep-single-sequence-gaps`, `shift-single-sequence`],
   [Regions and sequence rows], [`domain`, `domain-gap-rule`, `domain-gap-colors`, `highlight-block`, `region-color-scheme`, `lower`, `lower-block`, `emphasis-block`, `tint-block`, `tint-default`, `emphasis-default`, `frame`, `hide-sequence`, `hide-all-sequences`, `show-all-sequences`, `remove-sequence`, `no-shade`, `separation-line`, `sequence-order`],
-  [Feature and translation controls], [`feature-rule`, `codon`, `genetic-code`, `backtranslation-label`, `backtranslation-text`, `feature-text-label`, `feature-style-label`, label hide/color variants],
+  [Feature and translation controls], [`feature-rule`, `codon`, `genetic-code`, `backtranslation-label`, `backtranslation-text`, `feature-text-label`, `feature-style-label`, `hide-feature-text-label`, `hide-feature-style-label`, `hide-feature-text-labels`, `hide-feature-style-labels`, `feature-text-label-color`, `feature-style-label-color`, `feature-text-label-color-at`, `feature-style-label-color-at`],
   [Logo controls], [`frequency-correction`, `no-frequency-correction`, `subfamily`, `sequence-logo-name`, `subfamily-logo-name`, `logo-scale`, `no-logo-scale`, `logo-stretch`, `negative-logo-values`, `no-negative-logo-values`, `relevance-threshold`, `relevance-marker`, `no-relevance-marker`, `logo-color`, `clear-logo-colors`],
   [Legend controls], [`legend-color`, `legend-offset`, `color-swatch`],
   [Structure controls], [`show-structure-types`, `hide-structure-types`, `structure-appearance`, `use-first-dssp-column`, `use-second-dssp-column`, `stride-track`, `dssp-track`, `hmmtop-track`, `phd-topology-track`, `phd-secondary-track`],
-  [Graph/layout controls], [`bar-graph-stretch`, `color-scale-stretch`, `alignment-position`, `character-stretch`, `line-stretch`, `numbering-width`, `fingerprint`, `align-right-labels`, `align-left-labels`],
-  [Typography and spacing], [`text-family`, `text-weight`, `text-posture`, `text-size`, `text-style`, `caption`, `short-caption`, `small-separator`, `medium-separator`, `large-separator`, `block-gap`, `line-gap`, `feature-slot-space`, block/line gap size helpers],
+  [Graph/layout controls], [`bar-graph-stretch`, `color-scale-stretch`, `alignment-position`, `character-stretch`, `line-stretch`, `numbering-width`, `fingerprint`, `align-right-labels`, `align-left-labels`. Default block placement is left-aligned.],
+  [Typography and spacing], [`text-family`, `text-weight`, `text-posture`, `text-size`, `text-style`, `caption`, `short-caption`, `small-separator`, `medium-separator`, `large-separator`, `no-block-gap`, `small-block-gap`, `medium-block-gap`, `large-block-gap`, `block-gap`, `flexible-block-gap`, `fixed-block-gap`, `no-line-gap`, `small-line-gap`, `medium-line-gap`, `large-line-gap`, `line-gap`, `feature-slot-space`],
   [Sequence utilities], [`molecular-weight`, `net-charge`, `pdb-selection`],
 )
+
+= Public API Example Catalog
+
+This catalog gives an example invocation for every public Typshade function.
+The examples are intentionally compact; the visual behavior of the larger
+families is shown in the worked examples above.
+
+== Rendering, Recipes, Presets, Themes, And Colors
+
+Use `shade` for rendering, recipe functions for common figure purposes, presets
+and themes for reusable visual defaults, and color helpers when building custom
+Typst logic around Typshade colors.
+
+```typst
+#let alignment = read("alignment.msf", encoding: none)
+
+#shade(alignment, format: "msf")
+
+#shade(alignment, format: "msf", figure: publication(region: "80..112"))
+#shade(alignment, format: "msf", figure: motif-map(("NPA": "loop")))
+#shade(alignment, format: "msf", figure: structure-map(1, topology: read("AQP1.top", encoding: none)))
+#shade(alignment, format: "msf", figure: logo-analysis(sequence: 3, region: "203..235"))
+#shade(alignment, format: "msf", figure: overview(colors: "grays"))
+#let resolved-figure = resolve-figure(
+  alignment,
+  "msf",
+  publication(region: "80..112"),
+)
+
+#shade(alignment, format: "msf", preset: "publication")
+#shade(alignment, format: "msf", theme: "screen")
+#shade(
+  alignment,
+  format: "msf",
+  theme: visual-theme(names: "RoyalBlue", ruler: "DarkGray"),
+)
+
+#let preset-commands = shade-preset("publication")
+#let theme-commands = shade-theme((names: "RoyalBlue", ruler: "DarkGray"))
+#let resolved-red = resolve-color("BrickRed")
+#let midpoint = scale-color("ColdHot", 50)
+```
+
+== Data, Inspection, And Analysis
+
+These functions return parsed alignment data, diagnostic tables, or numerical
+sequence comparisons. They are useful both in prose and in figure-building
+logic.
+
+```typst
+#let alignment = read("alignment.msf", encoding: none)
+#let parsed = alignment-data(alignment, format: "msf")
+#let tiny = parse-alignment(">A\nACD\n>B\nA-D", format: "fasta")
+
+#alignment-summary(alignment, format: "msf")
+#sequence-list(alignment, format: "msf")
+#selection-preview(alignment, 1, "80..112", format: "msf")
+#selection-table(
+  alignment,
+  "80..112",
+  "NPA",
+  format: "msf",
+  sequence: 1,
+)
+
+#percent-identity(alignment, 1, 2, format: "msf")
+#percent-similarity(alignment, 1, 2, format: "msf")
+#similarity-table(alignment, format: "msf")
+```
+
+== Scoring, Shading, And Sequence-Type Controls
+
+Scoring helpers are usually placed in `commands:`. The lower-level controls are
+available when a figure needs exact threshold, residue style, similarity, or
+weight-table behavior.
+
+```typst
+#let alignment = read("alignment.msf", encoding: none)
+#let tcoffee-data = read("AQP_TC.asc", encoding: none)
+
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    sequence-type("P"),
+    identical(colors: "blues", threshold: 50),
+    similar(colors: "greens", threshold: 45),
+    diverse(sequence: 1),
+    functional("charge"),
+    single-sequence(sequence: 1),
+    tcoffee(tcoffee-data),
+    scoring-mode("similar"),
+    tcoffee-scores(tcoffee-data),
+    color-scheme("reds"),
+    threshold(60),
+    all-match-threshold(value: 90),
+    disable-all-match-threshold(),
+    shade-all-residues(),
+    hide-all-match-positions(),
+    show-all-match-positions(),
+    weight-table("BLOSUM62"),
+    set-weight("E", "Q", 2),
+    gap-penalty(-5),
+  ),
+)
+```
+
+```typst
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    residue-style("conserved", "White", "RoyalBlue", case: "upper", style: "bold"),
+    peptide-groups(("FYW", "ILVM", "RK", "DE", "GA", "ST", "NQ")),
+    dna-groups(("GAR", "CTY")),
+    peptide-similarities("S", "TA"),
+    dna-similarities("A", "GR"),
+    clear-functional-groups(),
+    functional-group("acidic (-)", "DE", "White", "Red"),
+    functional-style("D", "White", "BrickRed"),
+  ),
+)
+```
+
+== Windows, Labels, Numbering, Rulers, And Gaps
+
+The shortcut functions cover common cases. The track/control functions expose
+individual knobs for sequence labels, numbering, ruler names, ruler markers,
+gap characters, stop symbols, and leading-gap behavior.
+
+```typst
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    lines(40),
+    residues-per-line(40),
+    window(1, "80..112"),
+    sequence-window(1, "80..112", start: 80),
+
+    names(position: "left", color: "RoyalBlue"),
+    no-names(),
+    numbers(position: "right", color: "DarkGray"),
+    no-numbers(),
+    names-track(position: "left", color: "RoyalBlue"),
+    no-numbering(),
+    numbering-track(position: "leftright", color: "DarkGray"),
+
+    sequence-name(1, "AQP1"),
+    names-color("RoyalBlue"),
+    sequence-name-color((1, 3), "Red"),
+    hide-sequence-name((2,)),
+    numbering-color("DarkGray"),
+    sequence-number-color((1, 3), "Red"),
+    hide-sequence-number((2,)),
+
+    start-number(1, 80, selection: "80..112"),
+    allow-zero-numbering(),
+    disallow-zero-numbering(),
+    sequence-length(1, 269),
+  ),
+)
+```
+
+```typst
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    ruler("top", sequence: 1, every: 10, name: "AQP1 positions"),
+    no-ruler("bottom"),
+    ruler-track(position: "bottom", sequence: 1, steps: 5, color: "DarkGray"),
+    ruler-marker(100, "site", position: "top", color: "Red"),
+    ruler-steps(10),
+    ruler-color("DarkGray"),
+    ruler-name("positions"),
+    ruler-name-color("Red"),
+    ruler-space(2pt),
+    rotate-ruler(),
+    unrotate-ruler(),
+
+    gap-style(foreground: "Gray60", background: "White", rule: 0.5pt),
+    gap-char("."),
+    gap-rule(0.5pt),
+    gap-colors("Gray60", "White"),
+    stop-char("*"),
+    show-leading-gaps(),
+    hide-leading-gaps(),
+  ),
+)
+```
+
+== Consensus, Logos, Legends, And Swatches
+
+Consensus, logo, and legend helpers can be used as shortcuts or as explicit
+tracks. Logo controls cover frequency correction, subfamily views, scale labels,
+negative values, relevance markers, and custom residue colors.
+
+```typst
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    consensus("bottom", scale: "ColdHot", name: "conservation"),
+    no-consensus(),
+    consensus-track(position: "top", scale: "BlueRed", name: "consensus"),
+    consensus-name("agreement"),
+    consensus-language("english"),
+    consensus-symbols(".", "lower", "upper"),
+    consensus-colors(
+      none-fg: "Black",
+      none-bg: "White",
+      conserved-fg: "White",
+      conserved-bg: "RoyalBlue",
+      allmatch-fg: "Yellow",
+      allmatch-bg: "RoyalPurple",
+    ),
+    consensus-from-sequence(1),
+    consensus-from-all-sequences(),
+  ),
+)
+```
+
+```typst
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    logo("top", colors: "charge", name: "logo"),
+    no-logo(),
+    sequence-logo(position: "top", colors: "rasmol", name: "logo"),
+    no-sequence-logo(),
+    subfamily-logo((3,), position: "bottom", colors: "charge", name: "AQP3", negative-name: "others"),
+    no-subfamily-logo(),
+    frequency-correction(),
+    no-frequency-correction(),
+    subfamily((3,)),
+    sequence-logo-name("sequence logo"),
+    subfamily-logo-name("AQP3", negative-name: "others"),
+    logo-scale(position: "leftright", color: "DarkGray"),
+    no-logo-scale(),
+    logo-stretch(1.2),
+    negative-logo-values(),
+    no-negative-logo-values(),
+    relevance-threshold(1.0),
+    relevance-marker(char: "*", color: "Red"),
+    no-relevance-marker(),
+    logo-color("DE", "Red"),
+    clear-logo-colors(default: "Black"),
+  ),
+)
+
+#shade(alignment, format: "msf", commands: (legend(color: "Black"),))
+#shade(alignment, format: "msf", commands: (no-legend(), legend-track(color: "Black")))
+#shade(alignment, format: "msf", commands: (legend-color("DarkGray"), legend-offset(6pt, 0pt)))
+#color-swatch("RoyalBlue")
+```
+
+== Regions, Domains, Motifs, Marks, Graphs, And PDB Selections
+
+Region and annotation helpers handle the common TeXshade feature patterns:
+selected domains, block highlighting, tinting, emphasis, lowercase regions,
+frames, marks, motifs, graph tracks, and structure-derived selections.
+
+```typst
+#let pdb = read("1J4N.pdb", encoding: none)
+
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    domain(1, "80..90,100..112"),
+    domain-gap-rule(0.6pt),
+    domain-gap-colors("Gray70", "White"),
+
+    highlight(1, "NPA", fg: "White", bg: "BrickRed"),
+    highlight-block(1, "80..112", "White", "LightBlue"),
+    region-color-scheme(1, "80..112", "reds"),
+    tint(1, "158..163", intensity: "strong"),
+    tint-block(1, "158..163", intensity: "weak"),
+    tint-default("normal"),
+    emphasize(1, "NPA", style: "italic"),
+    emphasis-block(1, "158..163", style: "bold"),
+    emphasis-default("italic"),
+    lower(1, "80..90"),
+    lower-block(1, "80..90"),
+    frame(1, "82..82,106..106", color: "Red"),
+  ),
+)
+```
+
+```typst
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    mark("top", 1, "93..93", fill: "Yellow", text: "site"),
+    motif(1, "NXX[ST]N", text: "glycosylation", position: "top"),
+    graph("top", 1, "138..170", "conservation", kind: "bar"),
+    graph("bottom", 1, "138..170", "hydrophobicity", kind: "color", options: ("ColdHot",)),
+    bar-graph-stretch(1.4),
+    color-scale-stretch(1.2),
+    feature-rule(0.7pt),
+    feature-text-label("top", "features"),
+    feature-style-label("bottom", "graph"),
+    hide-feature-text-label("top"),
+    hide-feature-style-label("bottom"),
+    hide-feature-text-labels(),
+    hide-feature-style-labels(),
+    feature-text-label-color("DarkGray"),
+    feature-style-label-color("DarkGray"),
+    feature-text-label-color-at("top", "Red"),
+    feature-style-label-color-at("bottom", "Blue"),
+  ),
+)
+```
+
+```typst
+#let point = pdb-point(pdb, 81, distance: 8, atom: "CA")
+#let line = pdb-line(pdb, 81, 168, distance: 1)
+#let plane = pdb-plane(pdb, 66, 73, 199, distance: 1)
+
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    window(1, point),
+    highlight(1, line, bg: "Yellow"),
+    mark("top", 1, plane, text: "plane"),
+  ),
+)
+
+#pdb-selection(point)
+```
+
+== Sequence Visibility, Ordering, Layout, Typography, And Spacing
+
+These controls cover sequence visibility, row ordering, separators, figure
+placement, character metrics, fingerprints, label alignment, target-specific
+typography, captions, and block/line/feature spacing.
+
+```typst
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    hide-sequence(2),
+    hide-all-sequences(),
+    show-all-sequences(),
+    remove-sequence(5),
+    no-shade((1, 3)),
+    separation-line(3),
+    sequence-order((5, 4, 3, 2, 1)),
+
+    hide-residues(),
+    show-residues(),
+    fingerprint(360),
+    alignment-position("left"),
+    character-stretch(1.1),
+    line-stretch(1.05),
+    numbering-width(6),
+    align-right-labels(),
+    align-left-labels(),
+  ),
+)
+```
+
+```typst
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    typography(target: "all", family: "mono", size: 8pt),
+    text-family("names", "mono"),
+    text-weight("names", "bold"),
+    text-posture("features", "italic"),
+    text-size("residues", 7pt),
+    text-style("ruler", "sans", "regular", "normal", 7pt),
+
+    caption([Aquaporin alignment], position: "bottom"),
+    short-caption([AQP alignment]),
+    small-separator(),
+    medium-separator(),
+    large-separator(),
+    no-block-gap(),
+    small-block-gap(),
+    medium-block-gap(),
+    large-block-gap(),
+    block-gap(0.8em),
+    flexible-block-gap(),
+    fixed-block-gap(),
+    no-line-gap(),
+    small-line-gap(),
+    medium-line-gap(),
+    large-line-gap(),
+    line-gap(0.2pt),
+    feature-slot-space("top", 2pt),
+  ),
+)
+```
+
+== Translation, Structure Tracks, And Sequence Utilities
+
+Translation helpers configure codon handling and backtranslation display.
+Structure helpers attach DSSP, STRIDE, HMMTOP, PHD topology, or PHD secondary
+structure data and control which structure classes are visible.
+
+```typst
+#let dna = read("dna-alignment.msf", encoding: none)
+
+#shade(
+  dna,
+  format: "msf",
+  seq-type: "N",
+  commands: (
+    single-sequence(sequence: 1),
+    keep-single-sequence-gaps(),
+    shift-single-sequence(value: -1),
+    codon("A", "GCA,GCG,GCC,GCT,GCU,GCN"),
+    genetic-code("standard"),
+    backtranslation-label(style: "oblique", size: "tiny"),
+    backtranslation-text(style: "horizontal", size: "tiny"),
+    mark("bottom", 1, "1..90", style: "translate[Red]", text: "translation"),
+    mark("bottom", 1, "1..90", style: "complement[LightBlue][lower]", text: "complement"),
+  ),
+)
+```
+
+```typst
+#let topology = read("AQP1.top", encoding: none)
+#let secondary = read("AQP1.phd", encoding: none)
+#let hmmtop = read("AQP_HMM.ext", encoding: none)
+#let dssp = read("model.dssp", encoding: none)
+#let stride = read("model.stride", encoding: none)
+
+#shade(
+  alignment,
+  format: "msf",
+  commands: (
+    structures(
+      1,
+      topology: topology,
+      secondary: secondary,
+      hmmtop: hmmtop,
+    ),
+    structure-tracks(
+      1,
+      topology: topology,
+      secondary: secondary,
+      hmmtop: hmmtop,
+    ),
+    phd-topology-track(1, topology),
+    phd-secondary-track(1, secondary),
+    hmmtop-track(1, hmmtop, source-sequence: 1),
+    dssp-track(1, dssp),
+    stride-track(1, stride),
+    show-structure-types(
+      "PHDtopo",
+      ("TM", "internal", "external"),
+    ),
+    hide-structure-types("PHDtopo", ("internal",)),
+    structure-appearance(
+      "PHDtopo",
+      "TM",
+      "top",
+      "box[Blue]:TM",
+      "",
+    ),
+    use-first-dssp-column(),
+    use-second-dssp-column(),
+  ),
+)
+```
+
+```typst
+#molecular-weight("ACDEFGHIK", unit: "Da")
+#molecular-weight("ACDEFGHIK", unit: "kDa")
+#net-charge("ACDEFGHIK", termini: "o")
+#net-charge("ACDEFGHIK", termini: "i")
+```
 
 = Typst-Specific Improvements
 

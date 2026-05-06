@@ -89,6 +89,7 @@ Nucleotide alignment with DNA coloring:
 - `shade-theme("classic" | "print" | "screen" | "warm" | "nature")` and `visual-theme(...)`: Color/style bundles.
 - `highlight`, `tint`, `emphasize`, `mark`, `motif`, `graph`: Readable command builders for common annotations.
 - `pdb-point`, `pdb-line`, `pdb-plane`: Safer constructors for PDB selections.
+- `alignment-position("left" | "center" | "right")`: Overrides the default left-aligned block placement.
 - `alignment-summary(...)` and `selection-preview(...)`: In-document inspection helpers.
 - `sequence-list(...)` and `selection-table(...)`: Typst tables for data-aware reports.
 - `percent-identity(...)`, `percent-similarity(...)`, and `similarity-table(...)`: Pairwise identity/similarity analysis.
