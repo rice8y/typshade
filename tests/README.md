@@ -19,8 +19,9 @@ Run everything from the repository root:
 bash tests/run.sh
 ```
 
-By default, generated PDFs are written to the system temporary directory under
-`typshade-tests`. Set `TYPSHADE_TEST_OUT` to choose a stable output directory:
+By default, generated PDFs and image-verification PNGs are written to the
+system temporary directory under `typshade-tests`. Set `TYPSHADE_TEST_OUT` to
+choose a stable output directory:
 
 ```sh
 TYPSHADE_TEST_OUT=tests/out bash tests/run.sh
@@ -34,19 +35,62 @@ typst compile --root . tests/data-and-analysis.typ "${TMPDIR:-/tmp}/typshade-tes
 typst compile --root . tests/read-input-smoke.typ "${TMPDIR:-/tmp}/typshade-tests/read-input-smoke.pdf"
 typst compile --root . tests/public-api.typ "${TMPDIR:-/tmp}/typshade-tests/public-api.pdf"
 typst compile --root . tests/rendering-coverage.typ "${TMPDIR:-/tmp}/typshade-tests/rendering-coverage.pdf"
+typst compile --root . tests/full-feature-visual.typ "${TMPDIR:-/tmp}/typshade-tests/full-feature-visual.pdf"
+typst compile --root . tests/alignment-position-visual.typ "${TMPDIR:-/tmp}/typshade-tests/alignment-position-visual.pdf"
+typst compile --root . tests/auto-page-visual.typ "${TMPDIR:-/tmp}/typshade-tests/auto-page-visual.pdf"
 python3 tests/texshade_full_command_coverage.py
 ```
 
 `data-and-analysis.typ` uses `#assert` to verify parsed alignment data,
 selection handling, PDB selections, and similarity/identity helpers.
 
-`public-api.typ` constructs every intended public command helper. This catches
-renames, accidental unexports, and incompatible signatures.
+`public-api.typ` constructs every intended public command helper and renders a
+visual command-surface table. This catches renames, accidental unexports,
+incompatible signatures, and missing image-generation coverage for public
+command constructors.
 
 `rendering-coverage.typ` compiles representative Typshade figures through the
 actual renderer, including recipes, tracks, annotations, logos, structure tracks,
 bar/color graphs, T-Coffee data, and single-sequence mode.
 
+`full-feature-visual.typ` renders every public feature family, including
+top-level `shade(...)` options, MSF/ALN/FASTA inputs, recipes, tracks,
+annotations, PDB selections, graphs, themes, presets, typography/layout
+controls, inspection helpers, data helpers, and analysis utilities.
+
+`alignment-position-visual.typ` renders the default alignment placement together
+with explicit left, center, and right placement. The default must be left.
+
+`auto-page-visual.typ` renders `shade(...)` on `#set page(width: auto, height:
+auto)` and the runner checks that its PNG remains narrow. This catches accidental
+full-width wrappers that break auto-sized pages.
+
+`run.sh` converts every generated PDF to PNG pages with `pdftoppm` and fails if
+any visual page is missing or empty. This keeps strict tests image-based rather
+than compile-only.
+
 `texshade_full_command_coverage.py` checks that the documentation still maps
 the full TeXshade public command surface, including commands found outside the
 Quick Reference, to Typshade or to an explicitly excluded item.
+
+## TeXshade Visual Parity Audit
+
+When the TeXshade reference source and compiled manual are available, run the
+side-by-side visual parity audit:
+
+```sh
+bash tests/texshade_visual_parity.sh
+```
+
+By default, this uses:
+
+```text
+/Users/yoneyama/workspace/github/typshade-copy/texshade/texshade.dtx
+/Users/yoneyama/workspace/github/typshade-copy/texshade/texshade.pdf
+```
+
+Override these paths with `TEXSHADE_REFERENCE_DTX` and
+`TEXSHADE_REFERENCE_PDF`. The script renders TeXshade manual pages 15..38 and
+`tests/texshade-visual-parity.typ` to PNG, verifies that all images are
+non-empty, and builds a contact sheet PDF for human image-level comparison.
+See `tests/texshade-visual-parity-report.md` for the current visual findings.

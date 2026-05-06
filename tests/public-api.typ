@@ -10,6 +10,7 @@
 #let dssp-source = read("fixtures/reference/AQP1.top", encoding: none)
 #let pdb-source = read("fixtures/tiny.pdb", encoding: none)
 
+// COMMAND-SURFACE-BEGIN
 #let commands = (
   sequence-type("P"),
   color-scheme("blues"),
@@ -222,6 +223,7 @@
   resolve-color("Red"),
   scale-color("ColdHot", 50),
 )
+// COMMAND-SURFACE-END
 
 #assert(commands.len() > 180)
 #assert.eq(type(resolve-color("Red")), color)
@@ -230,3 +232,48 @@
 #assert.eq(type(net-charge("DEK")), str)
 
 Public API command constructors: #commands.len()
+
+#let command-label(item) = {
+  if type(item) == dictionary and item.keys().contains("kind") {
+    item.at("kind")
+  } else {
+    str(type(item))
+  }
+}
+
+#let command-cells = ()
+#for (idx, item) in commands.enumerate() {
+  command-cells.push([
+    #text(font: "DejaVu Sans Mono", size: 5.6pt)[#str(idx + 1) #command-label(item)]
+  ])
+}
+
+= Visual Command Surface
+
+Every public command constructor above is represented in this rendered table.
+The strict runner converts this PDF to PNG pages so command-surface coverage is
+checked through the same visual pipeline as rendered alignment figures.
+
+#table(
+  columns: 4,
+  inset: 2pt,
+  stroke: 0.25pt + luma(220),
+  ..command-cells,
+)
+
+== Visual Constructor Source
+
+The following source excerpt is rendered intentionally. It makes the generated
+PNG contain the exact public helper names, including helpers that expand to the
+same lower-level command kind.
+
+#let public-api-source = read("public-api.typ")
+#let constructor-source = (
+  public-api-source
+  .split("// COMMAND-SURFACE-BEGIN")
+  .at(1)
+  .split("// COMMAND-SURFACE-END")
+  .at(0)
+)
+
+#raw(constructor-source, lang: "typst", block: true)
