@@ -35,6 +35,7 @@ commit_if_changed "fix: apply command helpers during rendering (fixes #1)" \
 commit_if_changed "test: add image-level feature coverage" \
   tests/README.md \
   tests/public-api.typ \
+  tests/public_api_documentation_examples.py \
   tests/run.sh \
   tests/alignment-position-visual.typ \
   tests/auto-page-visual.typ \
@@ -43,10 +44,12 @@ commit_if_changed "test: add image-level feature coverage" \
   tests/texshade-visual-parity-report.md \
   tests/texshade_visual_parity.sh
 
-commit_if_changed "docs: refresh documentation and readme previews" \
-  README.md \
+commit_if_changed "docs: clarify public api result examples" \
   docs/documentation.pdf \
-  docs/documentation.typ \
+  docs/documentation.typ
+
+commit_if_changed "docs: refresh readme previews" \
+  README.md \
   docs/readme-gallery.typ \
   docs/readme-overview.typ \
   package/README.md \
