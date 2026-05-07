@@ -65,15 +65,20 @@
   ]
 ]
 
-#let example-result(body) = block(
+#let example-result(body, label: none) = block(
   width: 100%,
   inset: 7pt,
   fill: luma(252),
   stroke: 0.35pt + luma(215),
   radius: 2pt,
+  breakable: false,
   below: 0.9em,
 )[
   #text(weight: "bold", size: 8.5pt)[Typeset result]
+  #if label != none [
+    #h(0.5em)
+    #text(size: 8.2pt, fill: luma(80))[#label]
+  ]
   #v(4pt)
   #{
     set text(size: 6.8pt)
@@ -828,25 +833,27 @@ When exact filtering is needed, add controls:
 ```
 
 #example-result[
-  #shade(
-    demo-protein,
-    format: "msf",
-    commands: (
-      window(1, "1..80"),
-      structures(1, topology: demo-topology),
-      show-structure-types(
-        "PHDtopo",
-        ("TM", "internal", "external"),
+  #scale(x: 85%, y: 85%, origin: left)[
+    #shade(
+      demo-protein,
+      format: "msf",
+      commands: (
+        window(1, "1..80"),
+        structures(1, topology: demo-topology),
+        show-structure-types(
+          "PHDtopo",
+          ("TM", "internal", "external"),
+        ),
+        structure-appearance(
+          "PHDtopo",
+          "TM",
+          "top",
+          "box[Blue]:TM",
+          "",
+        ),
       ),
-      structure-appearance(
-        "PHDtopo",
-        "TM",
-        "top",
-        "box[Blue]:TM",
-        "",
-      ),
-    ),
-  )
+    )
+  ]
 ]
 
 == PDB-Based Selection
@@ -1705,6 +1712,8 @@ of object you want to control but do not remember the exact helper name.
 This catalog gives an example invocation for every public Typshade function.
 The examples are intentionally compact; the visual behavior of the larger
 families is shown in the worked examples above.
+When a subsection lists many invocations, the result caption names the compact
+call it demonstrates; the remaining snippets are command-surface examples.
 
 == Rendering, Recipes, Presets, Themes, And Colors
 
@@ -1742,6 +1751,19 @@ Typst logic around Typshade colors.
 #let midpoint = scale-color("ColdHot", 50)
 ```
 
+#example-result(label: [`publication(...)` recipe with `mode: "similar"` and `region: "80..112"`])[
+  #shade(
+    demo-protein,
+    format: "msf",
+    figure: publication(
+      mode: "similar",
+      region: "80..112",
+      line-length: 40,
+      conservation: false,
+    ),
+  )
+]
+
 == Data, Inspection, And Analysis
 
 These functions return parsed alignment data, diagnostic tables, or numerical
@@ -1768,6 +1790,12 @@ logic.
 #percent-similarity(alignment, 1, 2, format: "msf")
 #similarity-table(alignment, format: "msf")
 ```
+
+#example-result(label: [`alignment-summary(...)` followed by `selection-preview(...)`])[
+  #alignment-summary(demo-protein, format: "msf")
+  #v(0.5em)
+  #selection-preview(demo-protein, 1, "80..90", format: "msf")
+]
 
 == Scoring, Shading, And Sequence-Type Controls
 
@@ -1822,6 +1850,18 @@ weight-table behavior.
   ),
 )
 ```
+
+#example-result(label: [`functional("charge")`, `window(...)`, and `legend()`])[
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      functional("charge"),
+      window(1, "138..170"),
+      legend(),
+    ),
+  )
+]
 
 == Windows, Labels, Numbering, Rulers, And Gaps
 
@@ -1891,6 +1931,20 @@ gap characters, stop symbols, and leading-gap behavior.
 )
 ```
 
+#example-result(label: [`window(...)`, `ruler(...)`, `names(...)`, and `numbers(...)`])[
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      window(1, "80..112"),
+      ruler("top", sequence: 1, every: 10, name: "AQP1 positions"),
+      names(position: "left", color: "RoyalBlue"),
+      numbers(position: "right", color: "DarkGray"),
+      no-consensus(),
+    ),
+  )
+]
+
 == Consensus, Logos, Legends, And Swatches
 
 Consensus, logo, and legend helpers can be used as shortcuts or as explicit
@@ -1956,6 +2010,20 @@ negative values, relevance markers, and custom residue colors.
 #shade(alignment, format: "msf", commands: (legend-color("DarkGray"), legend-offset(6pt, 0pt)))
 #color-swatch("RoyalBlue")
 ```
+
+#example-result(label: [`logo(...)`, `consensus(...)`, hidden sequences, and bottom ruler])[
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      window(3, "203..235"),
+      logo("top", colors: "charge", name: "logo"),
+      consensus("bottom", scale: "ColdHot", name: "conservation"),
+      hide-all-sequences(),
+      ruler("bottom", sequence: 3, every: 5),
+    ),
+  )
+]
 
 == Regions, Domains, Motifs, Marks, Graphs, And PDB Selections
 
@@ -2034,6 +2102,20 @@ frames, marks, motifs, graph tracks, and structure-derived selections.
 #pdb-selection(point)
 ```
 
+#example-result(label: [`pdb-point(...)` selection with `highlight(...)` and `motif(...)`])[
+  #shade(
+    demo-tiny-protein,
+    format: "fasta",
+    seq-type: "P",
+    commands: (
+      ruler("top", sequence: 1, every: 1),
+      highlight(1, pdb-point(demo-pdb, 2, distance: 2), bg: "Yellow"),
+      motif(1, "A", text: "A motif", position: "bottom"),
+      no-consensus(),
+    ),
+  )
+]
+
 == Sequence Visibility, Ordering, Layout, Typography, And Spacing
 
 These controls cover sequence visibility, row ordering, separators, figure
@@ -2099,6 +2181,22 @@ typography, captions, and block/line/feature spacing.
   ),
 )
 ```
+
+#example-result(label: [`typography(...)`, character metrics, left placement, and ruler])[
+  #shade(
+    demo-protein,
+    format: "msf",
+    commands: (
+      window(1, "80..112"),
+      typography(target: "names", weight: "bold"),
+      character-stretch(1.1),
+      line-stretch(1.05),
+      alignment-position("left"),
+      ruler("top", sequence: 1, every: 10),
+      no-consensus(),
+    ),
+  )
+]
 
 == Translation, Structure Tracks, And Sequence Utilities
 
@@ -2179,6 +2277,21 @@ structure data and control which structure classes are visible.
 #net-charge("ACDEFGHIK", termini: "o")
 #net-charge("ACDEFGHIK", termini: "i")
 ```
+
+#example-result(label: [`single-sequence(...)` with translation and complement feature marks])[
+  #shade(
+    demo-dna,
+    format: "msf",
+    seq-type: "N",
+    commands: (
+      single-sequence(sequence: 1),
+      window(1, "414..443"),
+      mark("bottom", 1, "414..443", style: "translate[Red]", text: "translation"),
+      mark("bottom", 1, "414..443", style: "complement[LightBlue][lower]", text: "complement"),
+      no-consensus(),
+    ),
+  )
+]
 
 = Typst-Specific Improvements
 
