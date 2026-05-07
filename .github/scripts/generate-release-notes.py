@@ -5,7 +5,8 @@ GitHub's generated release notes are PR-centric. Typshade also uses issue
 references in conventional commit messages, for example
 `fix: apply command helpers during rendering (fixes #1)`. This script keeps the
 usual "by @user in #123" shape while recognizing those commit-message
-references directly.
+references directly. Commits that do not reference an issue or pull request are
+left out of the generated "What's Changed" list.
 """
 
 from __future__ import annotations
@@ -143,7 +144,7 @@ def clean_subject(subject: str) -> str:
     return out.strip()
 
 
-def release_line(repo: str, commit: Commit) -> str:
+def release_line(repo: str, commit: Commit) -> str | None:
     merge = MERGE_PR_RE.match(commit.subject)
     if merge:
         number = merge.group(1)
@@ -153,19 +154,23 @@ def release_line(repo: str, commit: Commit) -> str:
         return f"- {subject} by {by} in #{number}"
 
     refs = unique_refs(commit.subject)
+    if not refs:
+        return None
+
     subject = clean_subject(commit.subject)
     by = commit_author(repo, commit)
-    issue_suffix = f" in {', '.join(f'#{ref}' for ref in refs)}" if refs else ""
+    issue_suffix = f" in {', '.join(f'#{ref}' for ref in refs)}"
     return f"- {subject} by {by}{issue_suffix}"
 
 
 def write_notes(repo: str, tag: str, previous: str, commits: list[Commit], output: Path) -> None:
     lines = ["## What's Changed", ""]
+    release_lines = [line for commit in commits if (line := release_line(repo, commit))]
 
-    if commits:
-        lines.extend(release_line(repo, commit) for commit in commits)
+    if release_lines:
+        lines.extend(release_lines)
     else:
-        lines.append("- No commit changes found.")
+        lines.append("- No issue or pull request references found.")
 
     lines.append("")
     if previous:
