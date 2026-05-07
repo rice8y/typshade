@@ -54,7 +54,7 @@ The lower-level helpers are still available through `commands:` when you need pr
 ## Quick Start
 
 ```typst
-#import "@preview/typshade:0.1.0": *
+#import "@preview/typshade:0.1.1": *
 
 #let alignment = read("alignment.msf", encoding: none)
 
