@@ -61,6 +61,10 @@ commit_if_changed "docs: refresh readme previews" \
 commit_if_changed "chore: include readme assets in package archive" \
   package/typst.toml
 
+commit_if_changed "ci: generate release notes from commit references" \
+  .github/workflows/release.yml \
+  .github/scripts/generate-release-notes.py
+
 commit_if_changed "chore: add push helper" \
   push.sh
 
