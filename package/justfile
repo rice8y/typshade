@@ -43,10 +43,6 @@ install:
   if [ -d "internal" ]; then
     cp -r internal "$TARGET_DIR"
   fi
-  
-  if [ -f "unidep_plugin.wasm" ]; then
-    cp unidep_plugin.wasm "$TARGET_DIR"
-  fi
 
   [ -f "README.md" ] && cp README.md "$TARGET_DIR"
   [ -f "LICENSE" ] && cp LICENSE "$TARGET_DIR"
