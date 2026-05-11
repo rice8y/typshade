@@ -1,6 +1,6 @@
 #import "../package/lib.typ": *
 
-#set page(width: 184mm, height: auto, margin: 8mm, fill: white)
+#set page(width: auto, height: auto, margin: 3mm)
 #set text(size: 8pt)
 
 #let protein = ">AQP1.PRO\nTLGLLLSCQISILRAVMYIIAQCVGAIVASAIL\n>AQP2.PRO\nTVACLVGCHVSFLRAAFYVAAQLLGAVAGAAIL\n>AQP3.PRO\nTFAMCFLAREPWIKLPIYTLAQTLGAFLGAGIV\n>AQP4.PRO\nTVAMVCTRKISIAKSVFYITAQCLGAIIGAGIL\n>AQP5.PRO\nTLALLIGNQISLLRAVFYVAAQLVGAIAGAGIL\n"
