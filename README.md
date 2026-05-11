@@ -73,11 +73,17 @@ you want: publication figure, motif map, structure map, or logo analysis.
 
 ## Preview
 
-Protein alignment with conservation shading and motif annotation:
+Protein alignment with similarity shading, motif annotations, a ruler,
+a conservation track, and a legend:
 
 ![Protein alignment preview](package/images/readme-preview-1.png)
 
-Nucleotide alignment with DNA coloring:
+Protein alignment with hydropathy-based functional coloring:
+
+![Hydropathy preview](package/images/readme-preview-2.png)
+
+Nucleotide alignment with DNA coloring, a sequence logo, a conservation track,
+and a ruler:
 
 ![DNA alignment preview](package/images/readme-preview-3.png)
 

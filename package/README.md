@@ -68,11 +68,17 @@ The lower-level helpers are still available through `commands:` when you need pr
 
 ## Preview
 
-Protein alignment with conservation shading and motif annotation:
+Protein alignment with similarity shading, motif annotations, a ruler,
+a conservation track, and a legend:
 
 ![Protein alignment preview](images/readme-preview-1.png)
 
-Nucleotide alignment with DNA coloring:
+Protein alignment with hydropathy-based functional coloring:
+
+![Hydropathy preview](images/readme-preview-2.png)
+
+Nucleotide alignment with DNA coloring, a sequence logo, a conservation track,
+and a ruler:
 
 ![DNA alignment preview](images/readme-preview-3.png)
 
