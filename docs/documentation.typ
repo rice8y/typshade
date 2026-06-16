@@ -187,13 +187,17 @@ Typshade follows the TeXshade model: input files contain already-aligned
 sequences. It does not compute the alignment. Use external tools such as
 Clustal, MUSCLE, MAFFT, T-Coffee, or a domain-specific pipeline to create the
 alignment first, then read the result in your document and pass the bytes to
-`shade`.
+`shade`. `read(..., encoding: none)` remains supported on all supported Typst
+versions, including Typst 0.15 and later. With Typst 0.15 or later, you may
+also pass a resolved `path(...)` to Typshade and let the package read the file.
+This keeps path resolution on the project side while preserving existing
+`read(..., encoding: none)` documents.
 
 The `format:` argument defaults to `auto`, but explicit formats are recommended
-when using `read(..., encoding: none)` because bytes do not carry a filename
-extension:
+when using `read(..., encoding: none)` or `path(...)` for reproducible figures:
 
 ```typst
+// Works on all supported Typst versions, including Typst 0.15+.
 #let msf = read("alignment.msf", encoding: none)
 #let aln = read("alignment.aln", encoding: none)
 #let fasta = read("alignment.fasta", encoding: none)
@@ -201,6 +205,9 @@ extension:
 #shade(msf, format: "msf")
 #shade(aln, format: "aln", seq-type: "P")
 #shade(fasta, format: "fasta", seq-type: "N")
+
+// Typst 0.15+: path is resolved where it is constructed.
+#shade(path("alignment.msf"), format: "msf")
 ```
 
 == MSF Files
@@ -213,8 +220,18 @@ and aligned sequence blocks. If the MSF header declares peptide/nucleotide type,
 Typical use:
 
 ```typst
+#let alignment = read("AQPpro.MSF", encoding: none)
+
 #shade(
-  "AQPpro.MSF",
+  alignment,
+  format: "msf",
+  figure: publication(region: "80..112"),
+)
+
+// Typst 0.15+ alternative:
+#shade(
+  path("AQPpro.MSF"),
+  format: "msf",
   figure: publication(region: "80..112"),
 )
 ```
