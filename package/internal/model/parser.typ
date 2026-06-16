@@ -24,6 +24,16 @@
 
 #let _split-lines(text) = text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
 
+#let _v15-or-later() = sys.version >= version(0, 15, 0)
+
+#let _source-is-path(source) = {
+  if _v15-or-later() {
+    type(source) == path
+  } else {
+    false
+  }
+}
+
 #let _looks-like-source-text(source) = {
   let text = str(source)
   let trimmed = text.trim()
@@ -33,6 +43,8 @@
 #let _source-text(source) = {
   if type(source) == bytes {
     str(source)
+  } else if _source-is-path(source) {
+    str(read(source, encoding: none))
   } else {
     assert(type(source) == str and _looks-like-source-text(source))
     source

@@ -3,7 +3,7 @@
 
 #import "../engine/layout.typ": _empty-cell
 #import "../model/palette.typ": resolve-color, scale-color
-#import "../model/parser.typ": _source-text, _split-lines, _upper
+#import "../model/parser.typ": _source-is-path, _source-text, _split-lines, _upper
 
 #let _hydropathy-scale = (
   A: 1.8, C: 2.5, D: -3.5, E: -3.5, F: 2.8, G: -0.4, H: -3.2, I: 4.5,
@@ -250,10 +250,10 @@
 
 #let _graph-data-source(parsed) = {
   let metric = parsed.at("metric")
-  if _builtin-graph-metrics.contains(metric) {
+  if type(metric) == str and _builtin-graph-metrics.contains(metric) {
     return "builtin"
   }
-  if type(metric) == bytes {
+  if type(metric) == bytes or _source-is-path(metric) {
     return if parsed.at("kind") == "frustratometer" { "frustr" } else { "source" }
   }
   if parsed.at("kind") == "frustratometer" {
@@ -262,10 +262,10 @@
   if type(metric) == str and metric.contains("\n") {
     return "source"
   }
-  if parsed.at("kind") == "stackedbars" and metric.contains("(") {
+  if type(metric) == str and parsed.at("kind") == "stackedbars" and metric.contains("(") {
     return "inline"
   }
-  if parsed.at("kind") != "stackedbars" and metric.contains(",") {
+  if type(metric) == str and parsed.at("kind") != "stackedbars" and metric.contains(",") {
     return "inline"
   }
   "source"
