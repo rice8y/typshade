@@ -59,7 +59,7 @@ you want: publication figure, motif map, structure map, or logo analysis.
 ## Quick Start
 
 ```typst
-#import "@preview/typshade:0.1.1": *
+#import "@preview/typshade:0.1.2": *
 
 #let alignment = read("alignment.msf", encoding: none)
 
@@ -69,6 +69,12 @@ you want: publication figure, motif map, structure map, or logo analysis.
   theme: "screen",
   figure: motif-map(auto),
 )
+```
+
+`read(..., encoding: none)` remains supported on Typst 0.15 and later. On Typst 0.15 or later, you can additionally pass a resolved project path and let Typshade read the source inside the package:
+
+```typst
+#shade(path("alignment.msf"), format: "msf", figure: motif-map(auto))
 ```
 
 ## Preview
@@ -110,7 +116,7 @@ and a ruler:
 
 | TeXshade idea | Typshade API |
 |---|---|
-| `texshade` environment | `shade(read("alignment.msf", encoding: none), format: "msf", figure: publication(...))` |
+| `texshade` environment | `shade(read("alignment.msf", encoding: none), format: "msf", figure: publication(...))`, or `shade(path("alignment.msf"), format: "msf", ...)` on Typst 0.15+ |
 | `shadingmode`, `shadingcolors`, `threshold` | `similar`, `identical`, `diverse`, `functional`, or `scoring-mode`, `color-scheme`, `threshold` |
 | `residuesperline`, `setends` | `lines`, `window`, or `residues-per-line`, `sequence-window` |
 | `shownames`, `shownumbering`, `showconsensus`, `showruler` | `names`, `numbers`, `consensus`, `ruler`, or the fine-grained track helpers |
