@@ -34,10 +34,13 @@ mkdir -p "${TMPDIR:-/tmp}/typshade-tests"
 typst compile --root . tests/data-and-analysis.typ "${TMPDIR:-/tmp}/typshade-tests/data-and-analysis.pdf"
 typst compile --root . tests/read-input-smoke.typ "${TMPDIR:-/tmp}/typshade-tests/read-input-smoke.pdf"
 typst compile --root . tests/public-api.typ "${TMPDIR:-/tmp}/typshade-tests/public-api.pdf"
+typst compile --root . tests/semantic-behavior.typ "${TMPDIR:-/tmp}/typshade-tests/semantic-behavior.pdf"
 typst compile --root . tests/rendering-coverage.typ "${TMPDIR:-/tmp}/typshade-tests/rendering-coverage.pdf"
 typst compile --root . tests/full-feature-visual.typ "${TMPDIR:-/tmp}/typshade-tests/full-feature-visual.pdf"
+typst compile --root . tests/combinatorial-feature-matrix.typ "${TMPDIR:-/tmp}/typshade-tests/combinatorial-feature-matrix.pdf"
 typst compile --root . tests/alignment-position-visual.typ "${TMPDIR:-/tmp}/typshade-tests/alignment-position-visual.pdf"
 typst compile --root . tests/auto-page-visual.typ "${TMPDIR:-/tmp}/typshade-tests/auto-page-visual.pdf"
+bash tests/expected-failures.sh
 python3 tests/texshade_full_command_coverage.py
 ```
 
@@ -49,6 +52,10 @@ visual command-surface table. This catches renames, accidental unexports,
 incompatible signatures, and missing image-generation coverage for public
 command constructors.
 
+`semantic-behavior.typ` verifies behavior that is easier to assert through
+internal model data than through image inspection, such as sequence-based
+consensus semantics and default reference resolution.
+
 `rendering-coverage.typ` compiles representative Typshade figures through the
 actual renderer, including recipes, tracks, annotations, logos, structure tracks,
 bar/color graphs, T-Coffee data, and single-sequence mode.
@@ -57,6 +64,12 @@ bar/color graphs, T-Coffee data, and single-sequence mode.
 top-level `shade(...)` options, MSF/ALN/FASTA inputs, recipes, tracks,
 annotations, PDB selections, graphs, themes, presets, typography/layout
 controls, inspection helpers, data helpers, and analysis utilities.
+
+`combinatorial-feature-matrix.typ` stress-renders representative cross-products
+of the major feature families: scoring x selection, tracks x annotations, auto
+layout/pagination x content types, recipes, structure tracks, PDB selections,
+T-Coffee/frustration data, inspection helpers, and analysis output. This catches
+feature interactions that one-by-one constructor coverage cannot.
 
 `alignment-position-visual.typ` renders the default alignment placement together
 with explicit left, center, and right placement. The default must be left.
@@ -68,6 +81,10 @@ full-width wrappers that break auto-sized pages.
 `run.sh` converts every generated PDF to PNG pages with `pdftoppm` and fails if
 any visual page is missing or empty. This keeps strict tests image-based rather
 than compile-only.
+
+`expected-failures.sh` compiles intentionally invalid inputs and verifies that
+they fail with Typshade-level diagnostics rather than low-level indexing or
+parsing errors.
 
 `texshade_full_command_coverage.py` checks that the documentation still maps
 the full TeXshade public command surface, including commands found outside the

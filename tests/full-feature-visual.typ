@@ -171,6 +171,33 @@ rendered as document content, not only constructed as data.
 )
 
 #shade(
+  protein,
+  format: "fasta",
+  residues-per-line: auto,
+  legend: true,
+  caption: [Auto layout and data-driven styling],
+  commands: (
+    similar(colors: "greens"),
+    cell-style(ctx => if ctx.at("consensus-score") < 70 { (frame: "BrickRed") } else { none }),
+    graph("top", 1, "all", "entropy", kind: "color", options: ("WhiteBlack",), text: "entropy"),
+    graph("bottom", 1, "all", "coverage", kind: "bar", options: ("PineGreen", "Gray10"), text: "coverage"),
+  ),
+)
+
+#shade(
+  protein,
+  format: "fasta",
+  fit: (mode: "page", min: 2, max: 4, page: (blocks: 1, repeat-legend: false)),
+  caption: [Selection DSL with page-aware layout],
+  commands: (
+    window(1, select-or(select-motif("A[ED]"), select-metric("coverage", at-least: 50))),
+    highlight(1, select-and(select-range(1, 3), select-not(select-residues(2))), bg: "LightYellow"),
+    mark("top", 1, select-pad(select-residues(2), 1), text: "DSL"),
+    no-consensus(),
+  ),
+)
+
+#shade(
   ref-protein,
   format: "msf",
   figure: (
@@ -291,10 +318,39 @@ rendered as document content, not only constructed as data.
   ),
 )
 
+#grid(
+  columns: (1fr, 1fr),
+  gutter: 6pt,
+  panel[Flexible Block Gap][
+    #shade(
+      protein,
+      format: "fasta",
+      commands: (
+        lines(2),
+        block-gap(4pt),
+        flexible-block-gap(),
+        no-consensus(),
+      ),
+    )
+  ],
+  panel[Fixed Block Gap][
+    #shade(
+      protein,
+      format: "fasta",
+      commands: (
+        lines(2),
+        block-gap(4pt),
+        fixed-block-gap(),
+        no-consensus(),
+      ),
+    )
+  ],
+)
+
 == Inspection, Data, And Analysis Helpers
 
 #grid(
-  columns: (1fr, 1fr, 1fr),
+  columns: (1fr, 1fr, 1fr, 1fr),
   gutter: 6pt,
   panel[Summary][#alignment-summary(protein, format: "fasta")],
   panel[Sequences][#sequence-list(protein, format: "fasta")],
@@ -306,6 +362,7 @@ rendered as document content, not only constructed as data.
       format: "fasta",
     )
   ],
+  panel[Debug][#alignment-debug(protein, format: "fasta", commands: (lines(auto),))],
 )
 
 #similarity-table(protein, format: "fasta")
@@ -318,6 +375,7 @@ rendered as document content, not only constructed as data.
   inset: 4pt,
   [Feature], [Rendered Result],
   [`selection-preview`], [#selection-preview(protein, 1, "A[ED]", format: "fasta")],
+  [`cell-inspect`], [#cell-inspect(protein, 1, 1, format: "fasta")],
   [`percent-identity`], [#str(percent-identity(protein, 1, 2, format: "fasta")) + "%"],
   [`percent-similarity`], [#str(percent-similarity(protein, 1, 2, format: "fasta")) + "%"],
   [`molecular-weight`], [#molecular-weight("ACD")],
