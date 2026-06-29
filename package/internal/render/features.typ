@@ -325,7 +325,7 @@
       continue
     }
     let seq = alignment.at("sequences").at(_resolve-sequence(alignment, item.at("sequence")))
-    let selected = _selection-columns(seq, item.at("selection"))
+    let selected = _selection-columns(seq, item.at("selection"), alignment: alignment)
     let graph = _graph-style(item.at("style"))
     let cells = if graph != none {
       none

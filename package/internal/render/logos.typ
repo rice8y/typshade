@@ -126,21 +126,35 @@
   table(columns: columns, inset: 0pt, stroke: none, column-gutter: 2pt, row-gutter: 0pt, ..items)
 }
 
-#let _legend-block(config) = {
-  if not config.at("legend").at("show") or config.at("shading").at("mode") != "functional" {
+#let _legend-entry-table(config, items) = {
+  if items.len() == 0 {
     return none
   }
-  let option = config.at("shading").at("option", default: none)
-  let mode = if option == none { config.at("functional-default") } else { option }
-  if not config.at("functional-groups").keys().contains(mode) {
-    return none
-  }
-  let items = ()
-  for group in config.at("functional-groups").at(mode) {
-    items.push(box(width: 10pt, height: 10pt, fill: resolve-color(group.at("bg")), stroke: none)[])
-    items.push(text(.._text-params(config, "legend", fill: resolve-color(config.at("legend").at("color"))))[#_text-string(config, "legend", group.at("name"))])
+  let cells = ()
+  for item in items {
+    cells.push(box(width: 10pt, height: 10pt, fill: resolve-color(item.at("bg")), stroke: none)[])
+    cells.push(text(.._text-params(config, "legend", fill: resolve-color(config.at("legend").at("color"))))[#_text-string(config, "legend", item.at("label"))])
   }
   move(dx: config.at("legend").at("dx"), dy: config.at("legend").at("dy"))[
-    #table(columns: (10pt, auto), inset: (x: 2pt, y: 1pt), stroke: none, column-gutter: 4pt, row-gutter: 2pt, ..items)
+    #table(columns: (10pt, auto), inset: (x: 2pt, y: 1pt), stroke: none, column-gutter: 4pt, row-gutter: 2pt, ..cells)
   ]
+}
+
+#let _legend-block(config, items: ()) = {
+  if not config.at("legend").at("show") {
+    return none
+  }
+  if config.at("shading").at("mode") == "functional" {
+    let option = config.at("shading").at("option", default: none)
+    let mode = if option == none { config.at("functional-default") } else { option }
+    if not config.at("functional-groups").keys().contains(mode) {
+      return none
+    }
+    let functional-items = ()
+    for group in config.at("functional-groups").at(mode) {
+      functional-items.push((label: group.at("name"), fg: group.at("fg"), bg: group.at("bg")))
+    }
+    return _legend-entry-table(config, functional-items)
+  }
+  _legend-entry-table(config, items)
 }

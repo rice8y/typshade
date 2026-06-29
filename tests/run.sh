@@ -58,16 +58,20 @@ assert_png_width_less() {
 compile_typst "data-and-analysis.typ" "data-and-analysis"
 compile_typst "read-input-smoke.typ" "read-input-smoke"
 compile_typst "public-api.typ" "public-api"
+compile_typst "semantic-behavior.typ" "semantic-behavior"
 compile_typst "rendering-coverage.typ" "rendering-coverage"
 compile_typst "full-feature-visual.typ" "full-feature-visual"
+compile_typst "combinatorial-feature-matrix.typ" "combinatorial-feature-matrix"
 compile_typst "alignment-position-visual.typ" "alignment-position-visual"
 compile_typst "auto-page-visual.typ" "auto-page-visual"
 
 verify_pngs "data-and-analysis"
 verify_pngs "read-input-smoke"
 verify_pngs "public-api"
+verify_pngs "semantic-behavior"
 verify_pngs "rendering-coverage"
 verify_pngs "full-feature-visual"
+verify_pngs "combinatorial-feature-matrix"
 verify_pngs "alignment-position-visual"
 verify_pngs "auto-page-visual"
 
@@ -75,6 +79,8 @@ assert_png_width_less "$PNG_OUT/auto-page-visual/page-1.png" 700
 
 python3 "$ROOT/tests/texshade_full_command_coverage.py"
 python3 "$ROOT/tests/public_api_documentation_examples.py"
+python3 "$ROOT/tests/documentation_example_result_coverage.py"
+bash "$ROOT/tests/expected-failures.sh"
 
 echo "Typshade strict tests passed. PDFs written to $OUT"
 echo "Image verification PNGs written to $PNG_OUT"

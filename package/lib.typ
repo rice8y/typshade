@@ -8,6 +8,7 @@
 #import "internal/interface/inspect.typ": *
 #import "internal/interface/presets.typ": shade-preset, shade-theme, visual-theme
 #import "internal/interface/recipes.typ": *
+#import "internal/interface/selection.typ": *
 #import "internal/interface/shade.typ": *
 #import "internal/interface/shortcuts.typ": *
 #import "internal/interface/tracks.typ": *

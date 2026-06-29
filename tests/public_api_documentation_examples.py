@@ -18,6 +18,7 @@ PUBLIC_SOURCES = (
     ROOT / "package" / "internal" / "interface" / "inspect.typ",
     ROOT / "package" / "internal" / "interface" / "presets.typ",
     ROOT / "package" / "internal" / "interface" / "recipes.typ",
+    ROOT / "package" / "internal" / "interface" / "selection.typ",
     ROOT / "package" / "internal" / "interface" / "shade.typ",
     ROOT / "package" / "internal" / "interface" / "shortcuts.typ",
     ROOT / "package" / "internal" / "interface" / "tracks.typ",

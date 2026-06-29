@@ -7,6 +7,8 @@
 #import "presets.typ": shade-preset, shade-theme
 #import "../render/alignment.typ" as _render
 
+#let _typst-figure = figure
+
 #let _position-value(value, default) = if value == true {
   default
 } else {
@@ -29,6 +31,7 @@
   option: none,
   seq-type: auto,
   residues-per-line: none,
+  fit: none,
   names: none,
   numbering: none,
   consensus: none,
@@ -39,6 +42,8 @@
   regions: (),
   features: (),
   commands: (),
+  caption: none,
+  short-caption: none,
   font: none,
   font-size: none,
 ) = {
@@ -54,6 +59,29 @@
   }
   if residues-per-line != none {
     out.push(_config.residues-per-line(residues-per-line))
+  }
+  if fit != none {
+    if type(fit) == dictionary {
+      let fit-mode = fit.at("mode", default: fit.at("fit", default: "container"))
+      out.push(_config.auto-layout(
+        fit: fit-mode,
+        min: fit.at("min", default: 1),
+        max: fit.at("max", default: none),
+      ))
+      if fit-mode == "page" or fit.at("page", default: false) != false {
+        let page = fit.at("page", default: false)
+        if type(page) == dictionary {
+          out.push(_config.auto-page(blocks: page.at("blocks", default: auto), repeat-legend: page.at("repeat-legend", default: true)))
+        } else {
+          out.push(_config.auto-page())
+        }
+      }
+    } else if fit != false {
+      out.push(_config.auto-layout(fit: if fit == true { "container" } else { fit }))
+      if fit == "page" {
+        out.push(_config.auto-page())
+      }
+    }
   }
   if names != none {
     if names == false {
@@ -123,5 +151,13 @@
   out = _commands._add-command(out, regions)
   out = _commands._add-command(out, features)
   out = _commands._add-command(out, commands)
-  _render.render-alignment(source, format: format, commands: out, font: font, font-size: font-size)
+  if short-caption != none {
+    out.push(_config.short-caption(short-caption))
+  }
+  let rendered = _render.render-alignment(source, format: format, commands: out, font: font, font-size: font-size)
+  if caption == none {
+    rendered
+  } else {
+    _typst-figure(rendered, caption: caption)
+  }
 }

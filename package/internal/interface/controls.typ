@@ -9,6 +9,8 @@
 #let tcoffee-scores(source) = scoring-mode("T-Coffee", option: source)
 #let sequence-window(sequence, selection, start: none) = _config.sequence-window(sequence, selection, start: start)
 #let residues-per-line(value) = _config.residues-per-line(value)
+#let auto-layout(fit: "container", min: 1, max: none) = _config.auto-layout(fit: fit, min: min, max: max)
+#let auto-page(blocks: auto, repeat-legend: true) = _config.auto-page(blocks: blocks, repeat-legend: repeat-legend)
 #let threshold(value) = _config.threshold(value)
 #let shade-all-residues() = _config.shade-all-residues()
 #let all-match-threshold(value: 100) = _config.all-match-threshold(value: value)
@@ -21,6 +23,7 @@
 #let gap-penalty(value) = _config.gap-penalty(value)
 
 #let residue-style(target, fg, bg, case: "upper", style: "normal") = _config.residue-style(target, fg, bg, case: case, style: style)
+#let cell-style(callback) = _config.cell-style(callback)
 #let peptide-groups(groups) = _config.peptide-groups(groups)
 #let dna-groups(groups) = _config.dna-groups(groups)
 #let peptide-similarities(residue, similars) = _config.peptide-similarities(residue, similars)

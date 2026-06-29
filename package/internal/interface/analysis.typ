@@ -29,7 +29,7 @@
     return range(0, alignment.at("columns"))
   }
   let ref-index = _sequence-index(alignment, reference)
-  _layout._selection-columns(alignment.at("sequences").at(ref-index), selection)
+  _layout._selection-columns(alignment.at("sequences").at(ref-index), selection, alignment: alignment)
 }
 
 #let _similar-residue(a, b, seq-type, similarities: none, groups: none) = {
