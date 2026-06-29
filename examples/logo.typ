@@ -12,6 +12,6 @@
     color-scheme("blues"),
     no-consensus(),
     sequence-logo(position: "top", name: "logo", scale: "leftright", relevance-marker: (char: "*", color: "Black"), stretch: 1.1),
-    subfamily-logo((1, 2, 3, 4, 5, 6, 7), position: "bottom", name: "AQPs", negative-name: "GlpFs"),
+    subfamily-logo((1, 2, 3), position: "bottom", name: "AQPs", negative-name: "GlpFs"),
   ),
 )
