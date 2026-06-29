@@ -37,7 +37,7 @@
 #let _looks-like-source-text(source) = {
   let text = str(source)
   let trimmed = text.trim()
-  text.contains("\n") or trimmed.starts-with(">") or trimmed.starts-with("CLUSTAL") or trimmed.starts-with("MUSCLE") or trimmed.starts-with("ATOM") or trimmed.starts-with("HETATM") or text.contains(" MSF: ") or text.contains("!!AA_MULTIPLE_ALIGNMENT") or text.contains("!!NA_MULTIPLE_ALIGNMENT") or trimmed.matches(regex("^\\S+\\s+[A-Za-z\\-\\.]+$")).len() > 0
+  trimmed == "" or text.contains("\n") or trimmed.starts-with(">") or trimmed.starts-with("CLUSTAL") or trimmed.starts-with("MUSCLE") or trimmed.starts-with("ATOM") or trimmed.starts-with("HETATM") or text.contains(" MSF: ") or text.contains("!!AA_MULTIPLE_ALIGNMENT") or text.contains("!!NA_MULTIPLE_ALIGNMENT") or trimmed.matches(regex("^\\S+\\s+[A-Za-z\\-\\.]+$")).len() > 0
 }
 
 #let _source-text(source) = {
@@ -46,7 +46,10 @@
   } else if _source-is-path(source) {
     str(read(source, encoding: none))
   } else {
-    assert(type(source) == str and _looks-like-source-text(source))
+    assert(
+      type(source) == str and _looks-like-source-text(source),
+      message: "typshade: source must be alignment text, bytes, or path(...); use read(..., encoding: none) or path(...) for files",
+    )
     source
   }
 }
@@ -138,6 +141,25 @@
   )
 }
 
+#let _validated-alignment(format, sequences, seq-type, name: "alignment") = {
+  assert(sequences.len() > 0, message: "typshade: " + format + " alignment is empty")
+  let columns = sequences.first().at("aligned").len()
+  for seq in sequences {
+    let length = seq.at("aligned").len()
+    assert(
+      length == columns,
+      message: "typshade: " + format + " alignment has inconsistent column length for sequence `" + seq.at("name") + "`: expected " + str(columns) + ", got " + str(length),
+    )
+  }
+  (
+    format: format,
+    name: name,
+    seq-type: seq-type,
+    columns: columns,
+    sequences: sequences,
+  )
+}
+
 #let parse-msf(text) = {
   let lines = _split-lines(text)
   let body = false
@@ -184,12 +206,10 @@
       sequences.push(_build-sequence(name, blocks.at(name), (:)))
     }
   }
-  (
-    format: "MSF",
-    name: "alignment",
-    seq-type: if declared-type == none { _guess-seq-type(sequences) } else { declared-type },
-    columns: if sequences.len() > 0 { sequences.first().at("aligned").len() } else { 0 },
-    sequences: sequences,
+  _validated-alignment(
+    "MSF",
+    sequences,
+    if declared-type == none { _guess-seq-type(sequences) } else { declared-type },
   )
 }
 
@@ -216,13 +236,7 @@
   for name in pieces.keys() {
     sequences.push(_build-sequence(name, pieces.at(name), (:)))
   }
-  (
-    format: "ALN",
-    name: "alignment",
-    seq-type: _guess-seq-type(sequences),
-    columns: if sequences.len() > 0 { sequences.first().at("aligned").len() } else { 0 },
-    sequences: sequences,
-  )
+  _validated-alignment("ALN", sequences, _guess-seq-type(sequences))
 }
 
 #let parse-fasta(text) = {
@@ -245,26 +259,39 @@
   if current-name != none {
     sequences.push(_build-sequence(current-name, current-seq, (:)))
   }
-  (
-    format: "FASTA",
-    name: "alignment",
-    seq-type: _guess-seq-type(sequences),
-    columns: if sequences.len() > 0 { sequences.first().at("aligned").len() } else { 0 },
-    sequences: sequences,
-  )
+  _validated-alignment("FASTA", sequences, _guess-seq-type(sequences))
+}
+
+#let _detected-format(format, text) = {
+  if format == auto {
+    if text.trim().starts-with(">") {
+      return "FASTA"
+    }
+    if text.contains(" MSF: ") {
+      return "MSF"
+    }
+    return "ALN"
+  }
+  let key = _upper(str(format))
+  if key == "AUTO" {
+    _detected-format(auto, text)
+  } else if key == "FASTA" or key == "FA" or key == "FAS" {
+    "FASTA"
+  } else if key == "MSF" {
+    "MSF"
+  } else if key == "ALN" or key == "CLUSTAL" or key == "MUSCLE" {
+    "ALN"
+  } else {
+    assert(
+      false,
+      message: "typshade: unknown alignment format `" + str(format) + "`; expected auto, fasta, msf, or aln",
+    )
+  }
 }
 
 #let read-alignment(source, format: auto) = {
   let text = _source-text(source)
-  let detected = if format != auto {
-    _upper(str(format))
-  } else if text.trim().starts-with(">") {
-    "FASTA"
-  } else if text.contains(" MSF: ") {
-    "MSF"
-  } else {
-    "ALN"
-  }
+  let detected = _detected-format(format, text)
   if detected == "MSF" {
     parse-msf(text)
   } else if detected == "FASTA" {

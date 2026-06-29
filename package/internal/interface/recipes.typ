@@ -4,6 +4,7 @@
 #import "../engine/config.typ" as _config
 #import "../engine/commands.typ" as _commands
 #import "../engine/layout.typ": _selection-columns
+#import "../model/logo.typ": _resolve-sequence
 #import "../model/parser.typ": read-alignment
 #import "annotations.typ" as _annotations
 #import "tracks.typ": sequence-logo, structure-tracks
@@ -30,15 +31,7 @@
 }
 
 #let _sequence-index(alignment, sequence) = {
-  if type(sequence) == int {
-    return calc.max(0, sequence - 1)
-  }
-  for (idx, item) in alignment.at("sequences").enumerate() {
-    if item.at("name") == sequence {
-      return idx
-    }
-  }
-  0
+  _resolve-sequence(alignment, sequence)
 }
 
 #let _sequence(alignment, sequence) = alignment.at("sequences").at(_sequence-index(alignment, sequence))
@@ -55,7 +48,7 @@
 
 #let _selection-span(alignment, sequence, selection, padding: 0) = {
   let seq = _sequence(alignment, sequence)
-  let columns = _selection-columns(seq, selection)
+  let columns = _selection-columns(seq, selection, alignment: alignment)
   let first = none
   let last = none
   for col in columns {

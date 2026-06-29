@@ -177,6 +177,16 @@
     custom-weights: (:),
     gap-penalty: 0,
     residues-per-line: 60,
+    auto-layout: (
+      fit: none,
+      min: 1,
+      max: none,
+    ),
+    auto-page: (
+      enabled: false,
+      blocks: none,
+      repeat-legend: false,
+    ),
     font: "DejaVu Sans Mono",
     font-families: (
       serif: "Times New Roman",
@@ -217,6 +227,7 @@
       "position": "bottom",
       "scale": none,
       "name": "consensus",
+      "source": "all",
       "symbols": ("none": "", "conserved": "*", "allmatch": "!"),
       "colors": (
         "none": (fg: "Black", bg: "White"),
@@ -243,6 +254,7 @@
     functional-style-overrides: (:),
     functional-default: "charge",
     residue-style: _default-style("identical"),
+    cell-styles: (),
     sequence-logo: ("show": false, "position": "top", "colorset": none, "name": "logo", "scale": "leftright", "stretch": 1),
     subfamily-logo: ("show": false, "position": "top", "colorset": none, "name": "subfamily", "negative-name": "remaining", "show-negatives": true),
     logo-scale: ("show": true, "position": "leftright", "color": "Black"),
@@ -348,6 +360,8 @@
 #let set-weight(residue-a, residue-b, value) = _command("set-weight", (residue-a: residue-a, residue-b: residue-b, value: value))
 #let gap-penalty(value) = _command("gap-penalty", (value: value))
 #let residues-per-line(value) = _command("residues-per-line", (value: value))
+#let auto-layout(fit: "container", min: 1, max: none) = _command("auto-layout", (fit: fit, min: min, max: max))
+#let auto-page(blocks: auto, repeat-legend: true) = _command("auto-page", (blocks: blocks, repeat-legend: repeat-legend))
 #let numbering-track(position: "right", color: none) = _command("numbering-track", (position: position, color: color))
 #let no-numbering-track() = _command("no-numbering-track", (:))
 #let names-track(position: "left", color: none) = _command("names-track", (position: position, color: color))
@@ -366,6 +380,7 @@
 #let consensus-symbols(none-symbol, conserved-symbol, allmatch-symbol) = _command("consensus-symbols", ("none": none-symbol, conserved: conserved-symbol, allmatch: allmatch-symbol))
 #let consensus-colors(none-fg: "Black", none-bg: "White", conserved-fg: "Black", conserved-bg: "White", allmatch-fg: "Black", allmatch-bg: "White") = _command("consensus-colors", (none-fg: none-fg, none-bg: none-bg, conserved-fg: conserved-fg, conserved-bg: conserved-bg, allmatch-fg: allmatch-fg, allmatch-bg: allmatch-bg))
 #let residue-style(target, fg, bg, case: "upper", style: "normal") = _command("residue-style", (target: target, fg: fg, bg: bg, case: case, style: style))
+#let cell-style(callback) = _command("cell-style", (callback: callback))
 #let clear-functional-groups() = _command("clear-functional-groups", (:))
 #let functional-group(name, residues, fg, bg, case: "upper", style: "normal") = _command("functional-group", (name: name, residues: residues, fg: fg, bg: bg, case: case, style: style))
 #let functional-style(residue, fg, bg, case: "upper", style: "normal") = _command("functional-style", (residue: residue, fg: fg, bg: bg, case: case, style: style))
@@ -551,7 +566,8 @@
     config.at("shading").insert("mode", command.at("mode"))
     config.at("shading").insert("option", command.at("option"))
     if command.at("mode") == "diverse" or command.at("mode") == "singleseq" {
-      config.at("shading").insert("reference", command.at("option", default: 1))
+      let reference = command.at("option", default: none)
+      config.at("shading").insert("reference", if reference == none { 1 } else { reference })
     } else if command.at("mode") == "T-Coffee" and command.at("option") != none {
       config.at("tcoffee").insert("source", command.at("option"))
       config.at("tcoffee").insert("scores", read-tcoffee(command.at("option")))
@@ -677,6 +693,17 @@
     config.insert("gap-penalty", command.at("value"))
   } else if kind == "residues-per-line" {
     config.insert("residues-per-line", command.at("value"))
+  } else if kind == "auto-layout" {
+    config.at("auto-layout").insert("fit", command.at("fit"))
+    config.at("auto-layout").insert("min", command.at("min"))
+    config.at("auto-layout").insert("max", command.at("max"))
+    if command.at("fit") != none and command.at("fit") != false {
+      config.insert("residues-per-line", auto)
+    }
+  } else if kind == "auto-page" {
+    config.at("auto-page").insert("enabled", true)
+    config.at("auto-page").insert("blocks", command.at("blocks"))
+    config.at("auto-page").insert("repeat-legend", command.at("repeat-legend"))
   } else if kind == "numbering-track" {
     let pos = command.at("position")
     config.at("numbering").insert("show", true)
@@ -911,9 +938,9 @@
   } else if kind == "feature-style-label-color-at" {
     config.at("feature-style-name-colors").insert(command.at("position"), command.at("color"))
   } else if kind == "consensus-from-sequence" {
-    config.at("consensus").insert("name", "sequence " + str(command.at("sequence")))
+    config.at("consensus").insert("source", command.at("sequence"))
   } else if kind == "consensus-from-all-sequences" {
-    config.at("consensus").insert("name", "consensus")
+    config.at("consensus").insert("source", "all")
   } else if kind == "show-leading-gaps" {
     config.insert("show-leading-gaps", true)
   } else if kind == "hide-leading-gaps" {
@@ -945,6 +972,8 @@
     config.at("dna-sims").insert(_upper(str(command.at("residue"))), _upper(str(command.at("similars"))))
   } else if kind == "residue-style" {
     config.at("residue-style").insert(command.at("target"), _style-record(command.at("fg"), command.at("bg"), command.at("case"), command.at("style")))
+  } else if kind == "cell-style" {
+    config.at("cell-styles").push(command.at("callback"))
   } else if kind == "clear-functional-groups" {
     config.at("functional-groups").insert("custom", ())
     config.insert("functional-default", "custom")

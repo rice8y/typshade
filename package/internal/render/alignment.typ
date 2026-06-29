@@ -14,7 +14,7 @@
   let selected = ()
   for command in config.at("sequence-windows") {
     let seq = alignment.at("sequences").at(_resolve-sequence(alignment, command.at("sequence")))
-    for col in _selection-columns(seq, command.at("selection")) {
+    for col in _selection-columns(seq, command.at("selection"), alignment: alignment) {
       selected.push(col)
     }
   }
@@ -57,6 +57,15 @@
 }
 
 #let _weight-order = ("C", "S", "T", "P", "A", "G", "N", "D", "E", "Q", "H", "R", "K", "M", "I", "L", "V", "F", "Y", "W")
+
+#let _weight-index(value) = {
+  for (idx, item) in _weight-order.enumerate() {
+    if item == value {
+      return idx
+    }
+  }
+  none
+}
 
 #let _structural-rows = (
   C: (10, 6, 3, 3, 3, 5, 3, 1, 0, 1, 3, 3, 0, 3, 3, 3, 3, 5, 5, 5),
@@ -152,7 +161,7 @@
 
 #let _matrix-score(rows, a, b) = {
   let row = rows.at(a, default: none)
-  let index = _weight-order.position(b)
+  let index = _weight-index(b)
   if row == none or index == none {
     none
   } else {
@@ -245,6 +254,36 @@
     }
   }
   false
+}
+
+#let _validate-sequence-ref-list(alignment, refs) = {
+  for ref in refs {
+    let _ = _resolve-sequence(alignment, ref)
+  }
+  none
+}
+
+#let _validate-sequence-ref-map(alignment, refs) = {
+  for ref in refs.keys() {
+    let _ = _resolve-sequence(alignment, ref)
+  }
+  none
+}
+
+#let _validate-config-sequence-refs(alignment, config) = {
+  _validate-sequence-ref-list(alignment, config.at("hidden-names"))
+  _validate-sequence-ref-list(alignment, config.at("hidden-numbers"))
+  _validate-sequence-ref-list(alignment, config.at("hidden"))
+  _validate-sequence-ref-list(alignment, config.at("killed"))
+  _validate-sequence-ref-list(alignment, config.at("no-shade"))
+  _validate-sequence-ref-list(alignment, config.at("separation-lines"))
+  _validate-sequence-ref-list(alignment, config.at("subfamily"))
+  _validate-sequence-ref-map(alignment, config.at("sequence-names"))
+  _validate-sequence-ref-map(alignment, config.at("sequence-name-colors"))
+  _validate-sequence-ref-map(alignment, config.at("sequence-number-colors"))
+  _validate-sequence-ref-map(alignment, config.at("start-numbers"))
+  _validate-sequence-ref-map(alignment, config.at("sequence-lengths"))
+  none
 }
 
 #let _sequence-label(alignment, config, sequence, sequence-index) = {
@@ -407,6 +446,7 @@
   let styles = ()
   let consensus = none
   let consensus-score = 0
+  let consensus-forced = false
   if counts.keys().len() > 0 {
     let max-key = counts.keys().first()
     let max-count = counts.at(max-key)
@@ -419,10 +459,23 @@
     consensus = max-key
     consensus-score = max-count / alignment.at("sequences").len() * 100
   }
-  if config.at("weight-table") != "identity" or config.at("custom-weights").keys().len() > 0 or config.at("gap-penalty") != 0 {
+  let consensus-source = config.at("consensus").at("source", default: "all")
+  if consensus-source == "all" and (config.at("weight-table") != "identity" or config.at("custom-weights").keys().len() > 0 or config.at("gap-penalty") != 0) {
     let weighted = _weighted-consensus(counts, residues, seq-type, config)
     consensus = weighted.at("consensus")
     consensus-score = weighted.at("score")
+  }
+  if consensus-source != "all" {
+    let source-index = _resolve-sequence(alignment, consensus-source)
+    let source-char = _upper(alignment.at("sequences").at(source-index).at("aligned").slice(col, col + 1))
+    if source-char == "." or source-char == "-" or source-char == "" {
+      consensus = none
+      consensus-score = 0
+    } else {
+      consensus = source-char
+      consensus-score = counts.at(source-char, default: 0) / alignment.at("sequences").len() * 100
+      consensus-forced = true
+    }
   }
   let group-majority = none
   let group-counts = (:)
@@ -525,7 +578,7 @@
       }
     }
   }
-  (styles: styles, consensus: consensus, consensus-score: consensus-score)
+  (styles: styles, consensus: consensus, consensus-score: consensus-score, consensus-forced: consensus-forced)
 }
 
 #let _base-cell(char, fg: "Black", bg: "White", lower: false, emph: false, frame: none) = (
@@ -536,6 +589,55 @@
   frame: frame,
 )
 
+#let _merge-cell-delta(cell, delta) = {
+  if delta == none {
+    return cell
+  }
+  assert(type(delta) == dictionary, message: "typshade: cell-style callbacks must return none or a dictionary")
+  let updated = cell
+  for key in ("char", "fg", "bg", "emph", "frame", "frame-thickness", "rule") {
+    if delta.keys().contains(key) {
+      updated.insert(key, delta.at(key))
+    }
+  }
+  if delta.at("case", default: none) == "upper" {
+    updated.insert("char", _upper(updated.at("char")))
+  } else if delta.at("case", default: none) == "lower" {
+    updated.insert("char", _lower(updated.at("char")))
+  }
+  if delta.at("lower", default: false) {
+    updated.insert("char", _lower(updated.at("char")))
+  }
+  updated
+}
+
+#let _apply-cell-styles(alignment, config, sequence, sequence-index, column, column-info, style-info, cell) = {
+  let updated = cell
+  if config.at("cell-styles").len() == 0 {
+    return updated
+  }
+  let cell-context = (
+    alignment: alignment,
+    sequence: sequence,
+    sequence-index: sequence-index,
+    sequence-number: sequence-index + 1,
+    sequence-name: sequence.at("name"),
+    column-index: column,
+    column: column + 1,
+    position: sequence.at("positions").at(column),
+    residue: sequence.at("aligned").slice(column, column + 1),
+    kind: style-info.at("kind", default: "custom"),
+    consensus: column-info.at("consensus"),
+    consensus-score: column-info.at("consensus-score"),
+    consensus-forced: column-info.at("consensus-forced", default: false),
+    cell: updated,
+  )
+  for callback in config.at("cell-styles") {
+    updated = _merge-cell-delta(updated, callback(cell-context))
+    cell-context.insert("cell", updated)
+  }
+  updated
+}
 
 #let _apply-regions(alignment, config, sequence-index, column, cell) = {
   let updated = cell
@@ -543,7 +645,7 @@
     let target = _resolve-sequence(alignment, region.at("sequence"))
     if target == sequence-index or region.at("all") {
       let seq = alignment.at("sequences").at(target)
-      if _selection-columns(seq, region.at("selection")).contains(column) {
+      if _selection-columns(seq, region.at("selection"), alignment: alignment).contains(column) {
         let explicit-bg = region.at("bg", default: none)
         let scheme = region.at("scheme", default: config.at("shading").at("scheme"))
         let fill = if explicit-bg != none { explicit-bg } else if scheme == "reds" { "BrickRed" } else if scheme == "greens" { "PineGreen" } else if scheme == "grays" { "DarkGray" } else { "RoyalBlue" }
@@ -556,7 +658,7 @@
     let target = _resolve-sequence(alignment, region.at("sequence"))
     if target == sequence-index {
       let seq = alignment.at("sequences").at(target)
-      if _selection-columns(seq, region.at("selection")).contains(column) {
+      if _selection-columns(seq, region.at("selection"), alignment: alignment).contains(column) {
         let effect = if region.at("intensity", default: "medium") == "medium" { config.at("tint-default") } else { region.at("intensity") }
         updated.insert("bg", _tint-color(effect))
       }
@@ -566,7 +668,7 @@
     let target = _resolve-sequence(alignment, region.at("sequence"))
     if target == sequence-index {
       let seq = alignment.at("sequences").at(target)
-      if _selection-columns(seq, region.at("selection")).contains(column) {
+      if _selection-columns(seq, region.at("selection"), alignment: alignment).contains(column) {
         updated.insert("char", _lower(updated.at("char")))
       }
     }
@@ -575,7 +677,7 @@
     let target = _resolve-sequence(alignment, region.at("sequence"))
     if target == sequence-index {
       let seq = alignment.at("sequences").at(target)
-      if _selection-columns(seq, region.at("selection")).contains(column) {
+      if _selection-columns(seq, region.at("selection"), alignment: alignment).contains(column) {
         let style = if region.at("style", default: "italic") == "italic" { config.at("emph-default") } else { region.at("style") }
         updated.insert("emph", style != "normal")
       }
@@ -585,7 +687,7 @@
     let target = _resolve-sequence(alignment, region.at("sequence"))
     if target == sequence-index {
       let seq = alignment.at("sequences").at(target)
-      if _selection-columns(seq, region.at("selection")).contains(column) {
+      if _selection-columns(seq, region.at("selection"), alignment: alignment).contains(column) {
         updated.insert("frame", region.at("color"))
       }
     }
@@ -628,6 +730,8 @@
     let score = info.at("consensus-score")
     let level = if info.at("consensus") == none {
       "none"
+    } else if info.at("consensus-forced", default: false) and score < config.at("threshold") {
+      "conserved"
     } else if score >= config.at("allmatch-threshold") {
       "allmatch"
     } else if score >= config.at("threshold") {
@@ -675,7 +779,8 @@
   let cells = ()
   let no-shade = _matches-sequence(alignment, config.at("no-shade"), sequence-index)
   for col in segment {
-    let style-info = _style-for-column(alignment, config, col).at("styles").at(sequence-index)
+    let column-info = _style-for-column(alignment, config, col)
+    let style-info = column-info.at("styles").at(sequence-index)
     if no-shade {
       let raw-char = sequence.at("aligned").slice(col, col + 1)
       if raw-char == "." or raw-char == "-" {
@@ -685,6 +790,7 @@
       }
     }
     let cell = (char: style-info.at("char"), fg: style-info.at("fg"), bg: style-info.at("bg"), emph: style-info.at("emph", default: false), frame: none, rule: style-info.at("rule", default: false))
+    cell = _apply-cell-styles(alignment, config, sequence, sequence-index, col, column-info, style-info, cell)
     cells.push(_apply-regions(alignment, config, sequence-index, col, cell))
   }
   let hide-number = _matches-sequence(alignment, config.at("hidden-numbers"), sequence-index)
@@ -911,6 +1017,142 @@
   }
 }
 
+#let _line-count-is-auto(value) = value == auto or str(value) == "auto"
+
+#let _label-number-width(config, name-width, num-width) = {
+  let fixed = 0pt
+  if config.at("names").at("show") {
+    fixed += name-width
+  }
+  if config.at("numbering").at("show") and config.at("numbering").at("left") {
+    fixed += num-width
+  }
+  if config.at("numbering").at("show") and config.at("numbering").at("right") {
+    fixed += num-width
+  }
+  fixed
+}
+
+#let _resolved-residues-per-line(config, display-columns, available-width, cell-width, name-width, num-width) = {
+  let requested = config.at("residues-per-line")
+  if not _line-count-is-auto(requested) {
+    return calc.max(1, int(requested))
+  }
+  let limits = config.at("auto-layout")
+  let lower = calc.max(1, int(limits.at("min", default: 1)))
+  let upper = limits.at("max", default: none)
+  let clamp = value => {
+    let bounded = calc.max(lower, value)
+    if upper == none {
+      bounded
+    } else {
+      calc.min(int(upper), bounded)
+    }
+  }
+  if available-width == none or available-width == auto {
+    return clamp(calc.max(1, calc.min(60, display-columns.len())))
+  }
+  if available-width > 10000pt {
+    return clamp(calc.max(1, calc.min(60, display-columns.len())))
+  }
+  let fixed = _label-number-width(config, name-width, num-width)
+  let usable = calc.max(cell-width, available-width - fixed - 6pt)
+  clamp(calc.max(1, calc.min(display-columns.len(), int(calc.floor(usable / cell-width)))))
+}
+
+#let _resolved-blocks-per-page(alignment, config, available-height) = {
+  let page = config.at("auto-page")
+  if not page.at("enabled") {
+    return none
+  }
+  let requested = page.at("blocks")
+  if requested != auto and requested != none {
+    return calc.max(1, int(requested))
+  }
+  if requested == none or available-height == none or available-height == auto or available-height > 10000pt {
+    return none
+  }
+  let sequence-rows = _visible-sequences(alignment, config).len()
+  let consensus-rows = if config.at("consensus").at("show") { 1 } else { 0 }
+  let ruler-rows = if config.at("ruler").at("show") { 2 } else { 0 }
+  let logo-rows = (if config.at("sequence-logo").at("show") { 3 } else { 0 }) + (if config.at("subfamily-logo").at("show") and config.at("subfamily").len() > 0 { 3 } else { 0 })
+  let feature-count = config.at("features").len() + config.at("structure-data").len()
+  let feature-rows = calc.min(6, feature-count)
+  let rows = calc.max(1, sequence-rows + consensus-rows + ruler-rows + logo-rows + feature-rows)
+  let row-height = config.at("font-size") + config.at("line-gap") + 2pt
+  let estimated = rows * row-height + config.at("block-gap")
+  calc.max(1, int(calc.floor(available-height / estimated)))
+}
+
+#let _legend-style-label(kind) = {
+  if kind == "allmatch" {
+    "all match"
+  } else if kind == "conserved" {
+    "conserved"
+  } else if kind == "similar" {
+    "similar"
+  } else if kind == "gap" {
+    "gap"
+  } else if kind == "tcoffee" {
+    "T-Coffee"
+  } else {
+    kind
+  }
+}
+
+#let _legend-key-part(value) = {
+  if value == none {
+    "none"
+  } else if type(value) == color {
+    "color"
+  } else {
+    str(value)
+  }
+}
+
+#let _legend-items(alignment, config, columns) = {
+  if not config.at("legend").at("show") or config.at("shading").at("mode") == "functional" {
+    return ()
+  }
+  let items = (:)
+  let wanted = ("similar", "conserved", "allmatch", "gap", "tcoffee")
+  for col in columns {
+    let info = _style-for-column(alignment, config, col)
+    for style in info.at("styles") {
+      let kind = style.at("kind", default: "nomatch")
+      if wanted.contains(kind) {
+        let key = kind + ":" + _legend-key-part(style.at("fg", default: none)) + ":" + _legend-key-part(style.at("bg", default: none))
+        if not items.keys().contains(key) {
+          items.insert(key, (
+            label: _legend-style-label(kind),
+            fg: style.at("fg", default: "Black"),
+            bg: style.at("bg", default: "White"),
+          ))
+        }
+      }
+    }
+  }
+  if config.at("cell-styles").len() > 0 and not items.keys().contains("cell-style") {
+    items.insert("cell-style", (label: "cell-style", fg: "Black", bg: "Gray10"))
+  }
+  items.values()
+}
+
+#let _render-block-stack(config, edge, rendered) = {
+  let aligned = rendered.map(item => align(edge)[#item])
+  if config.at("fixed-block-space") {
+    return stack(spacing: config.at("block-gap"), ..aligned)
+  }
+  let body = []
+  for (idx, item) in aligned.enumerate() {
+    if idx > 0 and config.at("block-gap") != 0pt {
+      body += v(config.at("block-gap"), weak: true)
+    }
+    body += item
+  }
+  body
+}
+
 #let render-alignment(source, format: auto, commands: (), font: none, font-size: none, residues-per-line: none) = {
   context {
     let config = _default-config()
@@ -930,94 +1172,109 @@
     if config.at("seq-type") != none {
       alignment.insert("seq-type", config.at("seq-type"))
     }
+    let _ = _validate-config-sequence-refs(alignment, config)
     _apply-single-sequence-options(alignment, config)
     _apply-numbering-overrides(alignment, config)
-    let sequences = _visible-sequences(alignment, config)
-    let display-columns = _display-columns(alignment, config)
-    let cell-width = (measure(text(.._text-params(config, "residues"))[M]).width + 1.5pt) * config.at("char-stretch")
-    let name-width = _name-width(alignment, config)
-    let num-sample = "9" * config.at("numbering-width-digits")
-    let num-width = measure(text(.._text-params(config, "numbering"))[#num-sample]).width + 4pt
-    let blocks = ()
-    let step = config.at("residues-per-line")
-    let start = 0
-    while start < display-columns.len() {
-      let stop = calc.min(start + step, display-columns.len())
-      blocks.push(display-columns.slice(start, stop))
-      start = stop
-    }
-    let rendered = ()
-    if config.at("captions").at("top") != none {
-      rendered.push(text(.._text-params(config, "legend"))[#config.at("captions").at("top")])
-    }
-    let legend = _legend-block(config)
-    if legend != none {
-      rendered.push(legend)
-    }
-    for segment in blocks {
-      _append-feature-blocks(rendered, alignment, config, segment, _top-feature-slots, name-width, num-width, cell-width)
-      let rows = ()
-      if config.at("ruler").at("show") and config.at("ruler").at("position") == "top" {
-        for row in _ruler-rows(alignment, config, segment, "top") {
-          rows.push(row)
+    let render = (available-width, available-height) => {
+      let sequences = _visible-sequences(alignment, config)
+      let display-columns = _display-columns(alignment, config)
+      let cell-width = (measure(text(.._text-params(config, "residues"))[M]).width + 1.5pt) * config.at("char-stretch")
+      let name-width = _name-width(alignment, config)
+      let num-sample = "9" * config.at("numbering-width-digits")
+      let num-width = measure(text(.._text-params(config, "numbering"))[#num-sample]).width + 4pt
+      let blocks = ()
+      let step = _resolved-residues-per-line(config, display-columns, available-width, cell-width, name-width, num-width)
+      let start = 0
+      while start < display-columns.len() {
+        let stop = calc.min(start + step, display-columns.len())
+        blocks.push(display-columns.slice(start, stop))
+        start = stop
+      }
+      let rendered = ()
+      if config.at("captions").at("top") != none {
+        rendered.push(text(.._text-params(config, "legend"))[#config.at("captions").at("top")])
+      }
+      let legend = _legend-block(config, items: _legend-items(alignment, config, display-columns))
+      if legend != none {
+        rendered.push(legend)
+      }
+      let blocks-per-page = _resolved-blocks-per-page(alignment, config, available-height)
+      for (segment-index, segment) in blocks.enumerate() {
+        _append-feature-blocks(rendered, alignment, config, segment, _top-feature-slots, name-width, num-width, cell-width)
+        let rows = ()
+        if config.at("ruler").at("show") and config.at("ruler").at("position") == "top" {
+          for row in _ruler-rows(alignment, config, segment, "top") {
+            rows.push(row)
+          }
+          if config.at("ruler-spacing").at("top") != 0pt {
+            rendered.push(_render-table(rows, config, name-width, num-width, cell-width))
+            rendered.push(v(config.at("ruler-spacing").at("top"), weak: false))
+            rows = ()
+          }
         }
-        if config.at("ruler-spacing").at("top") != 0pt {
+        if config.at("sequence-logo").at("show") and config.at("sequence-logo").at("position") == "top" {
+          rendered.push(_logo-block(alignment, config, segment, name-width, num-width, cell-width))
+        }
+        if config.at("subfamily-logo").at("show") and config.at("subfamily-logo").at("position") == "top" and config.at("subfamily").len() > 0 {
+          rendered.push(_logo-block(alignment, config, segment, name-width, num-width, cell-width, subfamily: true))
+        }
+        if config.at("consensus").at("show") and config.at("consensus").at("position") == "top" {
+          rows.push(_consensus-row(alignment, config, display-columns, segment))
+        }
+        for seq in sequences {
+          let seq-index = _resolve-sequence(alignment, seq.at("name"))
+          rows.push(_row-for-sequence(alignment, config, seq, seq-index, segment))
+          if _matches-sequence(alignment, config.at("separation-lines"), seq-index) {
+            rows.push(_separation-row(config, segment))
+          }
+        }
+        if config.at("consensus").at("show") and config.at("consensus").at("position") == "bottom" {
+          rows.push(_consensus-row(alignment, config, display-columns, segment))
+        }
+        if config.at("sequence-logo").at("show") and config.at("sequence-logo").at("position") == "bottom" {
+          rows.push((label: "", left: "", right: "", cells: _array-fill(segment.len(), _empty-cell()), row-kind: "spacer"))
           rendered.push(_render-table(rows, config, name-width, num-width, cell-width))
-          rendered.push(v(config.at("ruler-spacing").at("top"), weak: false))
+          rendered.push(_logo-block(alignment, config, segment, name-width, num-width, cell-width))
           rows = ()
         }
-      }
-      if config.at("sequence-logo").at("show") and config.at("sequence-logo").at("position") == "top" {
-        rendered.push(_logo-block(alignment, config, segment, name-width, num-width, cell-width))
-      }
-      if config.at("subfamily-logo").at("show") and config.at("subfamily-logo").at("position") == "top" and config.at("subfamily").len() > 0 {
-        rendered.push(_logo-block(alignment, config, segment, name-width, num-width, cell-width, subfamily: true))
-      }
-      if config.at("consensus").at("show") and config.at("consensus").at("position") == "top" {
-        rows.push(_consensus-row(alignment, config, display-columns, segment))
-      }
-      for seq in sequences {
-        let seq-index = _resolve-sequence(alignment, seq.at("name"))
-        rows.push(_row-for-sequence(alignment, config, seq, seq-index, segment))
-        if _matches-sequence(alignment, config.at("separation-lines"), seq-index) {
-          rows.push(_separation-row(config, segment))
+        if config.at("subfamily-logo").at("show") and config.at("subfamily-logo").at("position") == "bottom" and config.at("subfamily").len() > 0 {
+          if rows.len() > 0 {
+            rendered.push(_render-table(rows, config, name-width, num-width, cell-width))
+            rows = ()
+          }
+          rendered.push(_logo-block(alignment, config, segment, name-width, num-width, cell-width, subfamily: true))
         }
-      }
-      if config.at("consensus").at("show") and config.at("consensus").at("position") == "bottom" {
-        rows.push(_consensus-row(alignment, config, display-columns, segment))
-      }
-      if config.at("sequence-logo").at("show") and config.at("sequence-logo").at("position") == "bottom" {
-        rows.push((label: "", left: "", right: "", cells: _array-fill(segment.len(), _empty-cell()), row-kind: "spacer"))
-        rendered.push(_render-table(rows, config, name-width, num-width, cell-width))
-        rendered.push(_logo-block(alignment, config, segment, name-width, num-width, cell-width))
-        rows = ()
-      }
-      if config.at("subfamily-logo").at("show") and config.at("subfamily-logo").at("position") == "bottom" and config.at("subfamily").len() > 0 {
+        if config.at("ruler").at("show") and config.at("ruler").at("position") == "bottom" {
+          if rows.len() > 0 and config.at("ruler-spacing").at("bottom") != 0pt {
+            rendered.push(_render-table(rows, config, name-width, num-width, cell-width))
+            rendered.push(v(config.at("ruler-spacing").at("bottom"), weak: false))
+            rows = ()
+          }
+          for row in _ruler-rows(alignment, config, segment, "bottom") {
+            rows.push(row)
+          }
+        }
         if rows.len() > 0 {
           rendered.push(_render-table(rows, config, name-width, num-width, cell-width))
-          rows = ()
         }
-        rendered.push(_logo-block(alignment, config, segment, name-width, num-width, cell-width, subfamily: true))
-      }
-      if config.at("ruler").at("show") and config.at("ruler").at("position") == "bottom" {
-        if rows.len() > 0 and config.at("ruler-spacing").at("bottom") != 0pt {
-          rendered.push(_render-table(rows, config, name-width, num-width, cell-width))
-          rendered.push(v(config.at("ruler-spacing").at("bottom"), weak: false))
-          rows = ()
-        }
-        for row in _ruler-rows(alignment, config, segment, "bottom") {
-          rows.push(row)
+        _append-feature-blocks(rendered, alignment, config, segment, _bottom-feature-slots, name-width, num-width, cell-width)
+        if blocks-per-page != none and segment-index + 1 < blocks.len() and calc.rem(segment-index + 1, blocks-per-page) == 0 {
+          rendered.push(pagebreak(weak: true))
+          if legend != none and config.at("auto-page").at("repeat-legend") {
+            rendered.push(legend)
+          }
         }
       }
-      if rows.len() > 0 {
-        rendered.push(_render-table(rows, config, name-width, num-width, cell-width))
+      if config.at("captions").at("bottom") != none {
+        rendered.push(text(.._text-params(config, "legend"))[#config.at("captions").at("bottom")])
       }
-      _append-feature-blocks(rendered, alignment, config, segment, _bottom-feature-slots, name-width, num-width, cell-width)
+      let edge = _alignment-edge(config)
+      _render-block-stack(config, edge, rendered)
     }
-    if config.at("captions").at("bottom") != none {
-      rendered.push(text(.._text-params(config, "legend"))[#config.at("captions").at("bottom")])
+    if _line-count-is-auto(config.at("residues-per-line")) or config.at("auto-page").at("blocks") == auto {
+      layout(size => render(size.width, size.height))
+    } else {
+      render(none, none)
     }
-    let edge = _alignment-edge(config)
-    stack(spacing: config.at("block-gap"), ..rendered.map(item => align(edge)[#item]))
   }
 }

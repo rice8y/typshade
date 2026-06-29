@@ -7,9 +7,18 @@
 #let _log2(value) = calc.log(value) / calc.log(2)
 #let _logo-max-bits(seq-type) = if seq-type == "N" { 2.0 } else { _log2(20.0) }
 
+#let _sequence-reference-message(alignment) = {
+  let names = alignment.at("sequences").map(seq => seq.at("name")).join(", ")
+  "expected a 1-based sequence index from 1 to " + str(alignment.at("sequences").len()) + " or one of: " + names
+}
+
 #let _resolve-sequence(alignment, sequence) = {
   if type(sequence) == int {
-    return calc.max(0, sequence - 1)
+    assert(
+      sequence >= 1 and sequence <= alignment.at("sequences").len(),
+      message: "typshade: sequence index `" + str(sequence) + "` is out of range; " + _sequence-reference-message(alignment),
+    )
+    return sequence - 1
   }
   let ref = str(sequence)
   for (idx, seq) in alignment.at("sequences").enumerate() {
@@ -17,7 +26,18 @@
       return idx
     }
   }
-  0
+  if ref.matches(regex("^\\d+$")).len() > 0 {
+    let index = int(ref)
+    assert(
+      index >= 1 and index <= alignment.at("sequences").len(),
+      message: "typshade: sequence index `" + ref + "` is out of range; " + _sequence-reference-message(alignment),
+    )
+    return index - 1
+  }
+  assert(
+    false,
+    message: "typshade: unknown sequence `" + ref + "`; " + _sequence-reference-message(alignment),
+  )
 }
 
 #let _functional-style(residue, mode) = {

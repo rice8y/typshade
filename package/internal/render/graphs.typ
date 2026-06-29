@@ -22,7 +22,7 @@
 )
 
 #let _graph-scales = ("BlackWhite", "WhiteBlack", "BlueRed", "RedBlue", "GreenRed", "RedGreen", "ColdHot", "HotCold", "TCoffee")
-#let _builtin-graph-metrics = ("hydrophobicity", "molweight", "charge", "conservation")
+#let _builtin-graph-metrics = ("hydrophobicity", "molweight", "charge", "conservation", "entropy", "gap-fraction", "gaps", "coverage", "identity", "identity-to-reference")
 
 #let _array-position(items, value) = {
   for (idx, item) in items.enumerate() {
@@ -125,17 +125,26 @@
   }
 }
 
-#let _graph-conservation(alignment, col) = {
+#let _graph-column-counts(alignment, col) = {
   let counts = (:)
   let total = 0
+  let gaps = 0
   for seq in alignment.at("sequences") {
     let residue = _upper(seq.at("aligned").slice(col, col + 1))
     if residue == "." or residue == "-" or residue == "" {
+      gaps += 1
       continue
     }
     counts.insert(residue, counts.at(residue, default: 0) + 1)
     total += 1
   }
+  (counts: counts, total: total, gaps: gaps)
+}
+
+#let _graph-conservation(alignment, col) = {
+  let data = _graph-column-counts(alignment, col)
+  let counts = data.at("counts")
+  let total = data.at("total")
   if total == 0 {
     return 0.0
   }
@@ -148,9 +157,51 @@
   top / total * 100.0
 }
 
-#let _builtin-graph-value(alignment, sequence, col, metric) = {
+#let _graph-entropy(alignment, col) = {
+  let data = _graph-column-counts(alignment, col)
+  let counts = data.at("counts")
+  let total = data.at("total")
+  if total == 0 {
+    return 0.0
+  }
+  let entropy = 0.0
+  for key in counts.keys() {
+    let p = counts.at(key) / total
+    if p > 0 {
+      entropy += -p * calc.log(p) / calc.log(2)
+    }
+  }
+  let max-entropy = if alignment.at("seq-type") == "N" { 2.0 } else { calc.log(20.0) / calc.log(2) }
+  calc.max(0.0, calc.min(100.0, entropy / max-entropy * 100.0))
+}
+
+#let _graph-gap-fraction(alignment, col) = _graph-column-counts(alignment, col).at("gaps") / alignment.at("sequences").len() * 100.0
+
+#let _graph-coverage(alignment, col) = _graph-column-counts(alignment, col).at("total") / alignment.at("sequences").len() * 100.0
+
+#let _graph-identity(alignment, sequence, col) = {
   let residue = _upper(sequence.at("aligned").slice(col, col + 1))
   if residue == "." or residue == "-" or residue == "" {
+    return none
+  }
+  let total = 0
+  let hits = 0
+  for seq in alignment.at("sequences") {
+    let other = _upper(seq.at("aligned").slice(col, col + 1))
+    if other == "." or other == "-" or other == "" {
+      continue
+    }
+    total += 1
+    if other == residue {
+      hits += 1
+    }
+  }
+  if total == 0 { none } else { hits / total * 100.0 }
+}
+
+#let _builtin-graph-value(alignment, sequence, col, metric) = {
+  let residue = _upper(sequence.at("aligned").slice(col, col + 1))
+  if (metric == "hydrophobicity" or metric == "molweight" or metric == "charge") and (residue == "." or residue == "-" or residue == "") {
     return none
   }
   if metric == "hydrophobicity" {
@@ -164,6 +215,18 @@
   }
   if metric == "conservation" {
     return _graph-conservation(alignment, col)
+  }
+  if metric == "entropy" {
+    return _graph-entropy(alignment, col)
+  }
+  if metric == "gap-fraction" or metric == "gaps" {
+    return _graph-gap-fraction(alignment, col)
+  }
+  if metric == "coverage" {
+    return _graph-coverage(alignment, col)
+  }
+  if metric == "identity" or metric == "identity-to-reference" {
+    return _graph-identity(alignment, sequence, col)
   }
   none
 }
@@ -362,6 +425,10 @@
   } else if parsed.at("metric") == "charge" {
     "RedBlue"
   } else if parsed.at("metric") == "conservation" {
+    "ColdHot"
+  } else if parsed.at("metric") == "entropy" or parsed.at("metric") == "gap-fraction" or parsed.at("metric") == "gaps" {
+    "WhiteBlack"
+  } else if parsed.at("metric") == "coverage" or parsed.at("metric") == "identity" or parsed.at("metric") == "identity-to-reference" {
     "ColdHot"
   } else {
     "WhiteBlack"
