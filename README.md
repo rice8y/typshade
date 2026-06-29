@@ -59,7 +59,7 @@ you want: publication figure, motif map, structure map, or logo analysis.
 ## Quick Start
 
 ```typst
-#import "@preview/typshade:0.1.2": *
+#import "@preview/typshade:0.1.3": *
 
 #let alignment = read("alignment.msf", encoding: none)
 
