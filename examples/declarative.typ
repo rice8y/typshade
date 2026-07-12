@@ -1,3 +1,5 @@
+//! Example demonstrating declarative command composition.
+
 #import "../package/lib.typ": *
 
 = Declarative typshade Recipes

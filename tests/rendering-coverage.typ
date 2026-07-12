@@ -1,3 +1,5 @@
+//! Rendering coverage fixture for tracks, styles, and annotations.
+
 #import "../package/lib.typ": *
 
 #set page(width: 220mm, height: auto, margin: 8mm)

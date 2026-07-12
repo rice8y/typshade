@@ -1,3 +1,5 @@
+//! Example demonstrating structural annotation tracks.
+
 #import "../package/lib.typ": shade, color-scheme, scoring-mode, ruler-track, structure-tracks
 
 #set page(width: auto, height: auto, margin: 12pt)

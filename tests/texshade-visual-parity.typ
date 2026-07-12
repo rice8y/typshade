@@ -1,3 +1,5 @@
+//! Visual parity fixture for TeXshade-compatible behavior.
+
 #import "../package/lib.typ": *
 
 #set page(width: 297mm, height: 210mm, margin: 8mm)

@@ -1,3 +1,5 @@
+//! Visual regression fixture for automatic pagination.
+
 #import "../package/lib.typ": *
 
 #set page(width: auto, height: auto, margin: 8pt)

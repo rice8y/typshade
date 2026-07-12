@@ -1,3 +1,5 @@
+//! Visual regression fixture for alignment positioning.
+
 #import "../package/lib.typ": *
 
 #set page(width: 180mm, height: auto, margin: 8mm)

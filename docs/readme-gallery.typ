@@ -1,3 +1,5 @@
+//! Gallery of representative Typshade renderings for the README.
+
 #import "../package/lib.typ": *
 
 #set page(width: auto, height: auto, margin: 3mm)

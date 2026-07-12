@@ -1,6 +1,8 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
+//! Selection DSL evaluation and alignment layout calculations.
+
 #import "../model/pdb.typ": _pdb-selection-positions
 #import "../model/parser.typ": _chars, _lower, _upper
 

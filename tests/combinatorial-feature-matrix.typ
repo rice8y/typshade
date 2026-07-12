@@ -1,3 +1,5 @@
+//! Pairwise combinatorial regression matrix for public features.
+
 // Visual combinatorial test for Typshade feature families.
 //
 // The complete Cartesian product of every numeric/string parameter is
