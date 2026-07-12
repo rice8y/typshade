@@ -1,9 +1,22 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
+//! Reusable visual themes and publication presets.
+
 #import "../engine/config.typ" as _config
 #import "../engine/commands.typ" as _commands
 
+/// Create a reusable visual-theme dictionary.
+///
+/// - `colors`: Color scheme or explicit color configuration.
+/// - `mode`: Combination or scoring mode.
+/// - `option`: Optional mode-specific value.
+/// - `gap`: Gap handling mode for the selected operation.
+/// - `names`: Sequence-name visibility, position, or configuration.
+/// - `numbering`: Numbering visibility, position, or configuration.
+/// - `ruler`: Ruler enablement, position, or configuration.
+/// - `legend`: Legend enablement or configuration.
+/// - `commands`: Command values applied in order.
 #let visual-theme(
   colors: none,
   mode: none,
@@ -59,6 +72,9 @@
   out
 }
 
+/// Resolve a named theme with optional overrides.
+///
+/// - `name`: Name used by the generated command or rendered element.
 #let shade-theme(name) = {
   if name == none or name == "classic" {
     ()
@@ -96,6 +112,9 @@
   }
 }
 
+/// Resolve a named shading preset with optional overrides.
+///
+/// - `name`: Name used by the generated command or rendered element.
 #let shade-preset(name) = {
   if name == none {
     ()

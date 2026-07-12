@@ -1,3 +1,5 @@
+//! Assertions and render checks for data and analysis helpers.
+
 #import "../package/lib.typ": *
 
 #set page(width: auto, height: auto, margin: 8pt)

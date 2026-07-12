@@ -1,3 +1,5 @@
+//! Example demonstrating T-Coffee score shading.
+
 #import "../package/lib.typ": shade, tcoffee-scores, ruler-track, consensus-track
 
 #set page(width: auto, height: auto, margin: 12pt)

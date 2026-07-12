@@ -1,3 +1,5 @@
+//! Example demonstrating functional residue shading.
+
 #import "../package/lib.typ": shade, consensus-track, legend-track, scoring-mode
 
 #set page(width: auto, height: auto, margin: 12pt)

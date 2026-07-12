@@ -1,6 +1,8 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
+//! Text-style normalization for alignment labels, residues, and annotations.
+
 #import "parser.typ": _upper
 
 #let _text-style-targets = (

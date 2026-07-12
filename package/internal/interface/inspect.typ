@@ -1,12 +1,15 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
+//! Diagnostic tables and inspection helpers for alignments and selections.
+
 #import "../engine/layout.typ" as _layout
 #import "../engine/commands.typ" as _commands
 #import "../engine/config.typ" as _config
 #import "../model/logo.typ" as _logo
 #import "../model/parser.typ" as _parser
 #import "../render/alignment.typ" as _render
+#import "html.typ" as _html
 
 #let _prepared-alignment(source, format, commands) = {
   let config = _config._default-config()
@@ -33,21 +36,44 @@
   str(selection)
 }
 
+/// Render a compact summary of an alignment.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `format`: Input format, or `auto` to detect it.
 #let alignment-summary(source, format: auto) = {
   let alignment = _parser.read-alignment(source, format: format)
   let names = alignment.at("sequences").map(seq => seq.at("name")).join(", ")
-  table(
-    columns: (auto, 1fr),
-    inset: (x: 6pt, y: 3pt),
-    stroke: (x, y) => if y == 0 { (bottom: 0.6pt) } else { none },
+  let headers = ([Field], [Value])
+  let rows = (
     [Format], [#alignment.at("format")],
     [Type], [#alignment.at("seq-type")],
     [Sequences], [#str(alignment.at("sequences").len())],
     [Columns], [#str(alignment.at("columns"))],
     [Names], [#names],
   )
+  let body-rows = ()
+  for idx in range(0, rows.len(), step: 2) {
+    body-rows.push((rows.at(idx), rows.at(idx + 1)))
+  }
+  _html.target-table(
+    table(
+      columns: (auto, 1fr),
+      inset: (x: 6pt, y: 3pt),
+      stroke: (x, y) => if y == 0 { (bottom: 0.6pt) } else { none },
+      ..headers,
+      ..rows,
+    ),
+    headers,
+    body-rows,
+  )
 }
 
+/// Return the columns matched by a Selection DSL expression.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - `format`: Input format, or `auto` to detect it.
 #let selection-preview(source, sequence, selection, format: auto) = {
   let alignment = _parser.read-alignment(source, format: format)
   let resolved-sequence = alignment.at("sequences").at(_logo._resolve-sequence(alignment, sequence))
@@ -61,44 +87,74 @@
   if positions.len() == 0 { "" } else { positions.join(",") }
 }
 
+/// Render sequence names, lengths, and ungapped sequences.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `format`: Input format, or `auto` to detect it.
 #let sequence-list(source, format: auto) = {
   let alignment = _parser.read-alignment(source, format: format)
-  let rows = ([Name], [Length], [Non-gap residues])
+  let headers = ([Name], [Length], [Non-gap residues])
+  let rows = ()
   for sequence in alignment.at("sequences") {
     let count = sequence.at("positions").filter(pos => pos != none).len()
-    rows.push([#sequence.at("name")])
-    rows.push([#str(sequence.at("aligned").len())])
-    rows.push([#str(count)])
+    rows.push(([#sequence.at("name")], [#str(sequence.at("aligned").len())], [#str(count)]))
   }
-  table(columns: (1fr, auto, auto), inset: (x: 5pt, y: 3pt), ..rows)
+  let flat = ()
+  for row in rows {
+    for cell in row {
+      flat.push(cell)
+    }
+  }
+  _html.target-table(
+    table(columns: (1fr, auto, auto), inset: (x: 5pt, y: 3pt), ..headers, ..flat),
+    headers,
+    rows,
+  )
 }
 
+/// Render named selections and their resolved positions.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `items`: Selection expressions or dictionaries containing `name`, `selection`, and optional `sequence` fields.
+/// - `format`: Input format, or `auto` to detect it.
+/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
 #let selection-table(source, ..items, format: auto, sequence: 1) = {
-  let rows = ([Name], [Selection], [Positions], [Count])
+  let headers = ([Name], [Selection], [Positions], [Count])
+  let rows = ()
   for item in items.pos() {
     let selection = if type(item) == dictionary { item.at("selection") } else { item }
     let name = if type(item) == dictionary and item.keys().contains("name") { item.at("name") } else { _selection-label(selection) }
     let item-sequence = if type(item) == dictionary { item.at("sequence", default: sequence) } else { sequence }
     let positions = selection-preview(source, item-sequence, selection, format: format)
     let count = if positions == "" { 0 } else { positions.split(",").len() }
-    rows.push([#name])
-    rows.push([#_selection-label(selection)])
-    rows.push([#positions])
-    rows.push([#str(count)])
+    rows.push(([#name], [#_selection-label(selection)], [#positions], [#str(count)]))
   }
-  table(columns: (auto, auto, 1fr, auto), inset: (x: 5pt, y: 3pt), ..rows)
+  let flat = ()
+  for row in rows {
+    for cell in row {
+      flat.push(cell)
+    }
+  }
+  _html.target-table(
+    table(columns: (auto, auto, 1fr, auto), inset: (x: 5pt, y: 3pt), ..headers, ..flat),
+    headers,
+    rows,
+  )
 }
 
+/// Render diagnostic information for a configured alignment.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `format`: Input format, or `auto` to detect it.
+/// - `commands`: Command values applied in order.
 #let alignment-debug(source, format: auto, commands: ()) = {
   let prepared = _prepared-alignment(source, format, commands)
   let alignment = prepared.at("alignment")
   let config = prepared.at("config")
   let visible = _render._visible-sequences(alignment, config).map(seq => seq.at("name")).join(", ")
   let display-columns = _render._display-columns(alignment, config)
-  table(
-    columns: (auto, 1fr),
-    inset: (x: 6pt, y: 3pt),
-    stroke: (x, y) => if y == 0 { (bottom: 0.6pt) } else { none },
+  let headers = ([Field], [Value])
+  let rows = (
     [Field], [Value],
     [Format], [#alignment.at("format")],
     [Type], [#alignment.at("seq-type")],
@@ -110,8 +166,29 @@
     [Scoring mode], [#str(config.at("shading").at("mode"))],
     [Consensus source], [#str(config.at("consensus").at("source", default: "all"))],
   )
+  let body-rows = ()
+  for idx in range(2, rows.len(), step: 2) {
+    body-rows.push((rows.at(idx), rows.at(idx + 1)))
+  }
+  _html.target-table(
+    table(
+      columns: (auto, 1fr),
+      inset: (x: 6pt, y: 3pt),
+      stroke: (x, y) => if y == 0 { (bottom: 0.6pt) } else { none },
+      ..rows,
+    ),
+    headers,
+    body-rows,
+  )
 }
 
+/// Inspect the resolved style and metadata of one alignment cell.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - `column`: One-based alignment column to inspect.
+/// - `format`: Input format, or `auto` to detect it.
+/// - `commands`: Command values applied in order.
 #let cell-inspect(source, sequence, column, format: auto, commands: ()) = {
   let prepared = _prepared-alignment(source, format, commands)
   let alignment = prepared.at("alignment")
@@ -132,10 +209,8 @@
   )
   cell = _render._apply-cell-styles(alignment, config, sequence-data, seq-index, col, info, style-info, cell)
   cell = _render._apply-regions(alignment, config, seq-index, col, cell)
-  table(
-    columns: (auto, 1fr),
-    inset: (x: 6pt, y: 3pt),
-    stroke: (x, y) => if y == 0 { (bottom: 0.6pt) } else { none },
+  let headers = ([Field], [Value])
+  let rows = (
     [Field], [Value],
     [Sequence], [#sequence-data.at("name")],
     [Column], [#str(column)],
@@ -147,5 +222,19 @@
     [Background], [#str(cell.at("bg"))],
     [Consensus], [#str(info.at("consensus"))],
     [Consensus score], [#str(calc.round(info.at("consensus-score") * 10) / 10)],
+  )
+  let body-rows = ()
+  for idx in range(2, rows.len(), step: 2) {
+    body-rows.push((rows.at(idx), rows.at(idx + 1)))
+  }
+  _html.target-table(
+    table(
+      columns: (auto, 1fr),
+      inset: (x: 6pt, y: 3pt),
+      stroke: (x, y) => if y == 0 { (bottom: 0.6pt) } else { none },
+      ..rows,
+    ),
+    headers,
+    body-rows,
   )
 }

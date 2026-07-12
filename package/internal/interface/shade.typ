@@ -1,6 +1,8 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
+//! Primary alignment shading and figure-rendering interface.
+
 #import "../engine/config.typ" as _config
 #import "../engine/commands.typ" as _commands
 #import "recipes.typ" as _recipes
@@ -8,6 +10,15 @@
 #import "../render/alignment.typ" as _render
 
 #let _typst-figure = figure
+
+#let _captioned-rendered(rendered, caption) = context if target() == "html" {
+  html.figure[
+    #rendered
+    #html.figcaption(caption)
+  ]
+} else {
+  _typst-figure(rendered, caption: caption)
+}
 
 #let _position-value(value, default) = if value == true {
   default
@@ -21,6 +32,32 @@
   default
 }
 
+/// Render a configured multiple-sequence alignment.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `format`: Input format, or `auto` to detect it.
+/// - `figure`: Recipe value or concrete figure options to resolve.
+/// - `preset`: Preset name, preset dictionary, or `none`.
+/// - `theme`: Theme name, theme dictionary, or `none`.
+/// - `mode`: Shading mode, or `none` to keep the preset's mode.
+/// - `option`: Optional mode-specific value.
+/// - `seq-type`: Sequence type, or `auto` to use the parsed alignment type.
+/// - `residues-per-line`: Residues rendered in each alignment block.
+/// - `fit`: Automatic layout mode, boolean enablement, or layout dictionary.
+/// - `names`: Sequence-name visibility or position.
+/// - `numbering`: Sequence-number visibility or position.
+/// - `consensus`: Consensus-track visibility or position.
+/// - `ruler`: Ruler visibility or position.
+/// - `logo`: Logo configuration or enablement value.
+/// - `subfamily-logo`: Subfamily-logo visibility, position, or configuration.
+/// - `legend`: Legend visibility, color, or configuration.
+/// - `regions`: Region annotation commands applied to the alignment.
+/// - `features`: Feature-track commands applied to the alignment.
+/// - `commands`: Command values applied in order.
+/// - `caption`: Caption content associated with the rendered figure.
+/// - `short-caption`: Short caption metadata retained for compatibility.
+/// - `font`: Font family used for alignment text.
+/// - `font-size`: Font size used for alignment text.
 #let shade(
   source,
   format: auto,
@@ -158,6 +195,6 @@
   if caption == none {
     rendered
   } else {
-    _typst-figure(rendered, caption: caption)
+    _captioned-rendered(rendered, caption)
   }
 }

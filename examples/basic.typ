@@ -1,3 +1,5 @@
+//! Minimal Typshade alignment example.
+
 #import "../package/lib.typ": *
 
 #set page(width: auto, height: auto, margin: 12pt)

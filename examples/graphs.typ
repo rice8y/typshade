@@ -1,3 +1,5 @@
+//! Example demonstrating alignment metric graphs.
+
 #import "../package/lib.typ": shade, color-scheme, gap-style, graph, ruler-marker, ruler-track, scoring-mode
 
 #set page(width: auto, height: auto, margin: 12pt)

@@ -25,6 +25,12 @@ compile_typst() {
   typst compile --root "$ROOT" "$ROOT/tests/$input" "$OUT/$name.pdf"
 }
 
+compile_html() {
+  local input="$1"
+  local name="$2"
+  typst compile --features html --format html --root "$ROOT" "$ROOT/tests/$input" "$OUT/$name.html" --pretty
+}
+
 verify_pngs() {
   local name="$1"
   local dir="$PNG_OUT/$name"
@@ -40,6 +46,43 @@ verify_pngs() {
   done
   if [[ "$count" -eq 0 ]]; then
     echo "error: no PNG pages generated for $name" >&2
+    exit 1
+  fi
+}
+
+verify_html() {
+  local name="$1"
+  local html="$OUT/$name.html"
+  if [[ ! -s "$html" ]]; then
+    echo "error: missing or empty HTML export for $name" >&2
+    exit 1
+  fi
+  if ! grep -q '<svg' "$html"; then
+    echo "error: HTML export for $name does not include an alignment SVG frame" >&2
+    exit 1
+  fi
+  if ! grep -q 'class="typshade-alignment"' "$html"; then
+    echo "error: HTML export for $name does not include the Typshade alignment wrapper" >&2
+    exit 1
+  fi
+  if ! grep -q '<figure' "$html"; then
+    echo "error: HTML export for $name does not include a captioned figure" >&2
+    exit 1
+  fi
+  if ! grep -q '<figcaption' "$html"; then
+    echo "error: HTML export for $name does not include a figcaption" >&2
+    exit 1
+  fi
+  if ! grep -q '<table' "$html"; then
+    echo "error: HTML export for $name does not include native HTML table output" >&2
+    exit 1
+  fi
+  if ! grep -q 'class="typshade-data-table"' "$html"; then
+    echo "error: HTML export for $name does not include Typshade styled data tables" >&2
+    exit 1
+  fi
+  if ! grep -q 'border-collapse:collapse' "$html"; then
+    echo "error: HTML export for $name does not include table border styling" >&2
     exit 1
   fi
 }
@@ -64,6 +107,7 @@ compile_typst "full-feature-visual.typ" "full-feature-visual"
 compile_typst "combinatorial-feature-matrix.typ" "combinatorial-feature-matrix"
 compile_typst "alignment-position-visual.typ" "alignment-position-visual"
 compile_typst "auto-page-visual.typ" "auto-page-visual"
+compile_html "html-export.typ" "html-export"
 
 verify_pngs "data-and-analysis"
 verify_pngs "read-input-smoke"
@@ -74,13 +118,16 @@ verify_pngs "full-feature-visual"
 verify_pngs "combinatorial-feature-matrix"
 verify_pngs "alignment-position-visual"
 verify_pngs "auto-page-visual"
+verify_html "html-export"
 
 assert_png_width_less "$PNG_OUT/auto-page-visual/page-1.png" 700
 
 python3 "$ROOT/tests/texshade_full_command_coverage.py"
 python3 "$ROOT/tests/public_api_documentation_examples.py"
 python3 "$ROOT/tests/documentation_example_result_coverage.py"
+python3 "$ROOT/tests/typage_documentation_comments.py"
 bash "$ROOT/tests/expected-failures.sh"
 
 echo "Typshade strict tests passed. PDFs written to $OUT"
 echo "Image verification PNGs written to $PNG_OUT"
+echo "HTML export smoke file written to $OUT/html-export.html"

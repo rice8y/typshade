@@ -1,3 +1,5 @@
+//! Visual regression fixture covering the complete feature surface.
+
 #import "../package/lib.typ": *
 
 #set page(width: 240mm, height: auto, margin: 8mm)

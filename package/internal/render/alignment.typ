@@ -1,6 +1,8 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
+//! Paginated alignment rendering for PDF and HTML targets.
+
 #import "../engine/config.typ": _apply-command, _default-config
 #import "features.typ": _bottom-feature-slots, _feature-rows, _ruler-rows, _top-feature-slots
 #import "../engine/layout.typ": _empty-cell, _selection-columns, _sorted-unique
@@ -1153,6 +1155,24 @@
   body
 }
 
+#let _html-alignment-frame(body) = html.elem(
+  "div",
+  attrs: (
+    class: "typshade-alignment",
+    style: "display:block;max-width:100%;overflow-x:auto;",
+  ),
+)[
+  #html.frame(body)
+]
+
+/// Render an alignment from low-level command values.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `format`: Input format, or `auto` to detect it.
+/// - `commands`: Command values applied in order.
+/// - `font`: Font family used for alignment text.
+/// - `font-size`: Font size used for alignment text.
+/// - `residues-per-line`: Residues rendered in each alignment block.
 #let render-alignment(source, format: auto, commands: (), font: none, font-size: none, residues-per-line: none) = {
   context {
     let config = _default-config()
@@ -1271,10 +1291,15 @@
       let edge = _alignment-edge(config)
       _render-block-stack(config, edge, rendered)
     }
-    if _line-count-is-auto(config.at("residues-per-line")) or config.at("auto-page").at("blocks") == auto {
+    let output = if _line-count-is-auto(config.at("residues-per-line")) or config.at("auto-page").at("blocks") == auto {
       layout(size => render(size.width, size.height))
     } else {
       render(none, none)
+    }
+    if target() == "html" {
+      _html-alignment-frame(output)
+    } else {
+      output
     }
   }
 }

@@ -1,6 +1,8 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
+//! Data-aware figure recipes that choose useful defaults automatically.
+
 #import "../engine/config.typ" as _config
 #import "../engine/commands.typ" as _commands
 #import "../engine/layout.typ": _selection-columns
@@ -368,6 +370,23 @@
   out
 }
 
+/// Create an adaptive publication-ready figure recipe.
+///
+/// - `mode`: Combination or scoring mode.
+/// - `similarity`: Similarity color scheme used by the recipe.
+/// - `threshold`: Percentage or score threshold used by the operation.
+/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - `region`: Optional region used to focus the recipe.
+/// - `line-length`: Residues per line, or `auto` to choose from the data.
+/// - `ruler`: Ruler enablement, position, or configuration.
+/// - `every`: Interval between generated ruler labels.
+/// - `conservation`: Conservation shading configuration.
+/// - `logo`: Logo configuration or enablement value.
+/// - `motifs`: Motif definitions or `auto` for data-aware discovery.
+/// - `highlights`: Selection highlights included by the recipe.
+/// - `theme`: Theme name or override dictionary.
+/// - `annotations`: Additional annotation commands applied by the recipe.
+/// - `commands`: Command values applied in order.
 #let publication(
   mode: "similar",
   similarity: "blues",
@@ -434,6 +453,20 @@
   out
 }
 
+/// Create a recipe that discovers and annotates sequence motifs.
+///
+/// - `motifs`: Motif definitions or `auto` for data-aware discovery.
+/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - `region`: Optional region used to focus the recipe.
+/// - `line-length`: Residues per line, or `auto` to choose from the data.
+/// - `similarity`: Similarity color scheme used by the recipe.
+/// - `threshold`: Percentage or score threshold used by the operation.
+/// - `logo`: Logo configuration or enablement value.
+/// - `conservation`: Conservation shading configuration.
+/// - `graph`: Metric-graph enablement or configuration.
+/// - `theme`: Theme name or override dictionary.
+/// - `highlights`: Selection highlights included by the recipe.
+/// - `commands`: Command values applied in order.
 #let motif-map(
   motifs,
   sequence: 1,
@@ -502,6 +535,21 @@
   out
 }
 
+/// Create a recipe combining an alignment with structural tracks.
+///
+/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - `topology`: Topology annotation source.
+/// - `secondary`: Secondary-structure annotation source.
+/// - `hmmtop`: HMMTOP annotation source.
+/// - `hmmtop-sequence`: Source sequence identifier used by HMMTOP data.
+/// - `region`: Optional region used to focus the recipe.
+/// - `line-length`: Residues per line, or `auto` to choose from the data.
+/// - `similarity`: Similarity color scheme used by the recipe.
+/// - `threshold`: Percentage or score threshold used by the operation.
+/// - `ruler`: Ruler enablement, position, or configuration.
+/// - `conservation`: Conservation shading configuration.
+/// - `theme`: Theme name or override dictionary.
+/// - `commands`: Command values applied in order.
 #let structure-map(
   sequence,
   topology: none,
@@ -563,6 +611,18 @@
   out
 }
 
+/// Create a recipe for sequence-logo analysis.
+///
+/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - `region`: Optional region used to focus the recipe.
+/// - `line-length`: Residues per line, or `auto` to choose from the data.
+/// - `colors`: Color scheme or explicit color configuration.
+/// - `subfamily`: Sequence subset used for subfamily analysis.
+/// - `negative`: Whether negative subfamily logo values are displayed.
+/// - `relevance`: Relevance threshold or marker configuration.
+/// - `conservation`: Conservation shading configuration.
+/// - `theme`: Theme name or override dictionary.
+/// - `commands`: Command values applied in order.
 #let logo-analysis(
   sequence: 1,
   region: none,
@@ -636,6 +696,17 @@
   out
 }
 
+/// Create a compact alignment overview recipe.
+///
+/// - `mode`: Combination or scoring mode.
+/// - `colors`: Color scheme or explicit color configuration.
+/// - `line-length`: Residues per line, or `auto` to choose from the data.
+/// - `names`: Sequence-name visibility, position, or configuration.
+/// - `numbers`: Numbering visibility, position, or configuration.
+/// - `conservation`: Conservation shading configuration.
+/// - `ruler`: Ruler enablement, position, or configuration.
+/// - `theme`: Theme name or override dictionary.
+/// - `commands`: Command values applied in order.
 #let overview(
   mode: "similar",
   colors: none,
@@ -705,6 +776,11 @@
   }
 }
 
+/// Resolve a recipe into concrete shade options and commands.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `format`: Input format, or `auto` to detect it.
+/// - `figure`: Recipe value or concrete figure options to resolve.
 #let resolve-figure(source, format, figure) = {
   let out = ()
   let items = if type(figure) == array { figure } else { (figure,) }

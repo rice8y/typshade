@@ -1,3 +1,5 @@
+//! Compile-time smoke coverage for the complete public API.
+
 #import "../package/lib.typ": *
 
 #set page(width: auto, height: auto, margin: 8pt)

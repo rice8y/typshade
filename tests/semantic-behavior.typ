@@ -1,3 +1,5 @@
+//! Assertions for command semantics and normalized alignment data.
+
 #import "../package/lib.typ": *
 #import "../package/internal/engine/config.typ": _apply-command, _default-config
 #import "../package/internal/model/parser.typ": read-alignment

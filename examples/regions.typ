@@ -1,3 +1,5 @@
+//! Example demonstrating region selections and annotations.
+
 #import "../package/lib.typ": shade, color-scheme, consensus-track, emphasize, highlight, mark, ruler-track, scoring-mode, tint
 
 #set page(width: auto, height: auto, margin: 12pt)

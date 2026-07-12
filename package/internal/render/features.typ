@@ -1,6 +1,8 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
+//! Feature, ruler, and structural-track rendering.
+
 #import "graphs.typ": _graph-rows, _graph-style
 #import "../engine/layout.typ": _empty-cell, _ordinal-label, _selection-columns, _selection-string
 #import "../model/logo.typ": _resolve-sequence

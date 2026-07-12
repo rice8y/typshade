@@ -1,3 +1,5 @@
+//! Example demonstrating Typst-native callbacks and styling.
+
 #import "../package/lib.typ": *
 
 = Typst-native typshade API

@@ -1,10 +1,13 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
+//! Pairwise identity and similarity analysis helpers.
+
 #import "../engine/layout.typ" as _layout
 #import "../model/logo.typ" as _logo
 #import "../model/palette.typ" as _palette
 #import "../model/parser.typ" as _parser
+#import "html.typ" as _html
 
 #let _upper(text) = {
   let lower = "abcdefghijklmnopqrstuvwxyz"
@@ -104,6 +107,15 @@
   }
 }
 
+/// Calculate pairwise sequence identity over a selection.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `sequence-a`: First sequence name or one-based index.
+/// - `sequence-b`: Second sequence name or one-based index.
+/// - `format`: Input format, or `auto` to detect it.
+/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - `reference`: Reference sequence used to map residue positions.
+/// - `seq-type`: Sequence type, or `auto` to use the parsed alignment type.
 #let percent-identity(
   source,
   sequence-a,
@@ -117,6 +129,17 @@
   _percent-score(alignment, sequence-a, sequence-b, "identity", selection: selection, reference: reference, seq-type: seq-type)
 }
 
+/// Calculate pairwise sequence similarity over a selection.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `sequence-a`: First sequence name or one-based index.
+/// - `sequence-b`: Second sequence name or one-based index.
+/// - `format`: Input format, or `auto` to detect it.
+/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - `reference`: Reference sequence used to map residue positions.
+/// - `seq-type`: Sequence type, or `auto` to use the parsed alignment type.
+/// - `similarities`: Optional residue-similarity mapping.
+/// - `groups`: Optional residue-group definitions.
 #let percent-similarity(
   source,
   sequence-a,
@@ -142,6 +165,15 @@
   )
 }
 
+/// Render a pairwise identity and similarity matrix.
+///
+/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - `format`: Input format, or `auto` to detect it.
+/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - `reference`: Reference sequence used to map residue positions.
+/// - `seq-type`: Sequence type, or `auto` to use the parsed alignment type.
+/// - `similarities`: Optional residue-similarity mapping.
+/// - `groups`: Optional residue-group definitions.
 #let similarity-table(
   source,
   format: auto,
@@ -154,16 +186,21 @@
   let alignment = _parser.read-alignment(source, format: format)
   let sequences = alignment.at("sequences")
   let columns = (auto,)
-  let rows = ([],)
+  let headers = ([],)
+  let flat = ([],)
   for seq in sequences {
     columns.push(auto)
-    rows.push([#seq.at("name")])
+    headers.push([#seq.at("name")])
+    flat.push([#seq.at("name")])
   }
+  let rows = ()
   for (row-index, row-seq) in sequences.enumerate() {
-    rows.push([#row-seq.at("name")])
+    let row = ([#row-seq.at("name")],)
+    flat.push([#row-seq.at("name")])
     for (col-index, col-seq) in sequences.enumerate() {
       if row-index == col-index {
-        rows.push([-])
+        row.push([-])
+        flat.push([-])
       } else {
         let kind = if col-index > row-index { "similarity" } else { "identity" }
         let value = _percent-score(
@@ -177,9 +214,15 @@
           similarities: similarities,
           groups: groups,
         )
-        rows.push([#str(value)])
+        row.push([#str(value)])
+        flat.push([#str(value)])
       }
     }
+    rows.push(row)
   }
-  table(columns: columns, inset: (x: 5pt, y: 3pt), ..rows)
+  _html.target-table(
+    table(columns: columns, inset: (x: 5pt, y: 3pt), ..flat),
+    headers,
+    rows,
+  )
 }
