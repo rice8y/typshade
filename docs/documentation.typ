@@ -415,7 +415,7 @@ manual overrides in `commands:`.
 = Quick Start
 
 ```typst
-#import "@preview/typshade:0.1.0": *
+#import "@preview/typshade:0.1.4": *
 
 #shade(
   "alignment.msf",
