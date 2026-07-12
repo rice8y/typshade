@@ -77,6 +77,18 @@ you want: publication figure, motif map, structure map, or logo analysis.
 #shade(path("alignment.msf"), format: "msf", figure: motif-map(auto))
 ```
 
+## HTML Export
+
+Typst HTML export is experimental and currently requires the HTML feature flag.
+Typshade detects the HTML target and wraps rendered alignment figures in a
+scrollable `html.frame` SVG, while `caption:` is emitted as semantic
+`figure`/`figcaption` HTML. Data-report helpers such as `selection-table`
+emit native HTML tables with explicit border styling.
+
+```sh
+typst compile --features html --format html --root . your-document.typ out.html
+```
+
 ## Preview
 
 Protein alignment with similarity shading, motif annotations, a ruler,
@@ -114,6 +126,7 @@ and a ruler:
 - `sequence-list(...)` and `selection-table(...)`: Typst tables for data-aware reports.
 - `percent-identity(...)`, `percent-similarity(...)`, and `similarity-table(...)`: Pairwise identity/similarity analysis.
 - `alignment-data(...)` and `parse-alignment(...)`: Data access helpers for custom Typst logic.
+- HTML export support: alignment figures become scrollable SVG frames when compiled with Typst's experimental HTML target.
 
 ## TeXshade To Typshade
 

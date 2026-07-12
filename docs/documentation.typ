@@ -1,3 +1,5 @@
+//! Complete Typshade manual with executable examples and rendered results.
+
 #import "../package/lib.typ": *
 
 #set document(title: "Typshade Documentation", author: "Eito Yoneyama")
@@ -84,6 +86,24 @@
     set text(size: 6.8pt)
     body
   }
+]
+
+#let browser-result(body, label: none, breakable: true) = block(
+  width: 100%,
+  inset: 7pt,
+  fill: luma(252),
+  stroke: 0.35pt + luma(215),
+  radius: 2pt,
+  breakable: breakable,
+  below: 0.9em,
+)[
+  #text(weight: "bold", size: 8.5pt)[Browser-rendered HTML]
+  #if label != none [
+    #h(0.5em)
+    #text(size: 8.2pt, fill: luma(80))[#label]
+  ]
+  #v(4pt)
+  #body
 ]
 
 #let result-panel(title, body) = block(
@@ -3220,7 +3240,33 @@ structure data and control which structure classes are visible.
   `selection-table` can be embedded in documents.
 - `alignment-data` and `parse-alignment` expose parsed data for custom Typst
   logic.
+- HTML export uses Typst's HTML target to produce scrollable SVG alignment
+  frames and semantic captions.
 - Public names follow Typst conventions instead of TeX macro naming.
+
+== HTML Export
+
+Typst HTML export is experimental and currently requires the HTML feature flag.
+Compile with `--features html --format html`; Typshade will detect the HTML
+target and wrap `shade(...)` output in a scrollable `html.frame` SVG. A
+`caption:` on `shade(...)` becomes semantic `figure`/`figcaption` HTML.
+Data-report helpers such as `selection-table` emit native HTML tables with
+explicit border styling.
+
+The following smoke-test source is exported with the command below. The
+browser screenshot is generated from the same source.
+
+```sh
+typst compile --features html --format html --root . tests/html-export.typ html-export.html
+```
+
+#raw(read("../tests/html-export.typ"), lang: "typst", block: true)
+
+#browser-result(label: [Chrome rendering of the exported HTML], breakable: false)[
+  #align(center)[
+    #image("images/html-export-browser.png", width: 72%)
+  ]
+]
 
 = Known Typst Differences
 
