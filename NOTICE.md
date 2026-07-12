@@ -8,8 +8,7 @@ Typshade is distributed under the GNU General Public License, version 2. See [LI
 
 ## TeXshade-derived Test Fixtures
 
-The files under `tests/fixtures/reference/` are compatibility fixtures derived
-from the TeXshade v1.29 distribution and examples:
+The files under `tests/fixtures/reference/` are compatibility fixtures derived from the TeXshade v1.29 distribution and examples:
 
 - `AQPpro.MSF`
 - `AQPDNA.MSF`
@@ -24,14 +23,8 @@ from the TeXshade v1.29 distribution and examples:
 - `standard.cod`
 - `ciliate.cod`
 
-TeXshade is copyright (C) 1999-2025 Eric Beitz and is distributed under the GNU
-General Public License, version 2. The fixtures are retained only for
-testing and documentation of TeXshade-compatible behavior.
+TeXshade is copyright (C) 1999-2025 Eric Beitz and is distributed under the GNU General Public License, version 2. The fixtures are retained only for testing and documentation of TeXshade-compatible behavior.
 
-The TeXshade README states that the package is free software redistributable
-and modifiable under the GNU General Public License as published by the Free
-Software Foundation, either version 2 of the License or, at the user's option,
-any later version.
+The TeXshade README states that the package is free software redistributable and modifiable under the GNU General Public License as published by the Free Software Foundation, either version 2 of the License or, at the user's option, any later version.
 
-The small files directly under `tests/fixtures/` are synthetic Typshade test
-fixtures.
+The small files directly under `tests/fixtures/` are synthetic Typshade test fixtures.

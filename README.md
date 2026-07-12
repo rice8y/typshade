@@ -10,10 +10,7 @@ Inspired by [TeXshade](https://ctan.org/pkg/texshade), Typshade rethinks alignme
 
 ## Why Typshade?
 
-TeXshade is powerful, but its UI reflects TeX: many global commands, implicit
-state, and order-sensitive setup before the alignment is rendered. Typshade
-keeps the feature set while making the source read like a figure
-specification.
+TeXshade is powerful, but its UI reflects TeX: many global commands, implicit state, and order-sensitive setup before the alignment is rendered. Typshade keeps the feature set while making the source read like a figure specification.
 
 TeXshade style:
 
@@ -52,9 +49,7 @@ Typshade style:
 )
 ```
 
-The lower-level helpers are still available through `commands:` when you need
-precise control, but new documents can usually start from the kind of figure
-you want: publication figure, motif map, structure map, or logo analysis.
+The lower-level helpers are still available through `commands:` when you need precise control, but new documents can usually start from the kind of figure you want: publication figure, motif map, structure map, or logo analysis.
 
 ## Quick Start
 
@@ -79,11 +74,7 @@ you want: publication figure, motif map, structure map, or logo analysis.
 
 ## HTML Export
 
-Typst HTML export is experimental and currently requires the HTML feature flag.
-Typshade detects the HTML target and wraps rendered alignment figures in a
-scrollable `html.frame` SVG, while `caption:` is emitted as semantic
-`figure`/`figcaption` HTML. Data-report helpers such as `selection-table`
-emit native HTML tables with explicit border styling.
+Typst HTML export is experimental and currently requires the HTML feature flag. Typshade detects the HTML target and wraps rendered alignment figures in a scrollable `html.frame` SVG, while `caption:` is emitted as semantic `figure`/`figcaption` HTML. Data-report helpers such as `selection-table` emit native HTML tables with explicit border styling.
 
 ```sh
 typst compile --features html --format html --root . your-document.typ out.html
@@ -91,8 +82,7 @@ typst compile --features html --format html --root . your-document.typ out.html
 
 ## Preview
 
-Protein alignment with similarity shading, motif annotations, a ruler,
-a conservation track, and a legend:
+Protein alignment with similarity shading, motif annotations, a ruler, a conservation track, and a legend:
 
 ![Protein alignment preview](package/images/readme-preview-1.png)
 
@@ -100,8 +90,7 @@ Protein alignment with hydropathy-based functional coloring:
 
 ![Hydropathy preview](package/images/readme-preview-2.png)
 
-Nucleotide alignment with DNA coloring, a sequence logo, a conservation track,
-and a ruler:
+Nucleotide alignment with DNA coloring, a sequence logo, a conservation track, and a ruler:
 
 ![DNA alignment preview](package/images/readme-preview-3.png)
 
@@ -141,21 +130,15 @@ and a ruler:
 | `includeDSSP`, `includeSTRIDE`, `includeHMMTOP`, `includePHD*` | `structure-tracks`, `dssp-track`, `stride-track`, `hmmtop-track`, `phd-topology-track`, `phd-secondary-track` |
 | font and spacing macros | `text-family`, `text-weight`, `text-posture`, `text-size`, `block-gap`, `feature-slot-space` |
 
-See [docs/documentation.typ](docs/documentation.typ) for the full guide and a
-larger correspondence table.
+See [docs/documentation.typ](docs/documentation.typ) for the full guide and a larger correspondence table.
 
 ## Smart Recipes
 
-Recipes inspect the alignment before rendering. For example, `motif-map(auto)`
-detects common motifs for the sequence type, focuses the region around them,
-chooses a readable line length, adds conservation when useful, and enables a
-logo only when the figure stays readable. Override any option when you need
-exact control.
+Recipes inspect the alignment before rendering. For example, `motif-map(auto)` detects common motifs for the sequence type, focuses the region around them, chooses a readable line length, adds conservation when useful, and enables a logo only when the figure stays readable. Override any option when you need exact control.
 
 ## Fine-Grained Control
 
-Macro-style command names are intentionally not part of the public API. Use
-Typst-shaped command helpers when you need detailed control:
+Macro-style command names are intentionally not part of the public API. Use Typst-shaped command helpers when you need detailed control:
 
 - Scoring: `threshold`, `weight-table`, `set-weight`, `gap-penalty`, `residue-style`, `functional-group`.
 - Tracks: `names-track`, `numbering-track`, `consensus-name`, `consensus-symbols`, `ruler-name`, `ruler-marker`, `logo-color`.

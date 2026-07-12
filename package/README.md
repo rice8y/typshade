@@ -74,11 +74,7 @@ The lower-level helpers are still available through `commands:` when you need pr
 
 ## HTML Export
 
-Typst HTML export is experimental and currently requires the HTML feature flag.
-Typshade detects the HTML target and wraps rendered alignment figures in a
-scrollable `html.frame` SVG, while `caption:` is emitted as semantic
-`figure`/`figcaption` HTML. Data-report helpers such as `selection-table`
-emit native HTML tables with explicit border styling.
+Typst HTML export is experimental and currently requires the HTML feature flag. Typshade detects the HTML target and wraps rendered alignment figures in a scrollable `html.frame` SVG, while `caption:` is emitted as semantic `figure`/`figcaption` HTML. Data-report helpers such as `selection-table` emit native HTML tables with explicit border styling.
 
 ```sh
 typst compile --features html --format html --root . your-document.typ out.html
@@ -86,8 +82,7 @@ typst compile --features html --format html --root . your-document.typ out.html
 
 ## Preview
 
-Protein alignment with similarity shading, motif annotations, a ruler,
-a conservation track, and a legend:
+Protein alignment with similarity shading, motif annotations, a ruler, a conservation track, and a legend:
 
 ![Protein alignment preview](images/readme-preview-1.png)
 
@@ -95,8 +90,7 @@ Protein alignment with hydropathy-based functional coloring:
 
 ![Hydropathy preview](images/readme-preview-2.png)
 
-Nucleotide alignment with DNA coloring, a sequence logo, a conservation track,
-and a ruler:
+Nucleotide alignment with DNA coloring, a sequence logo, a conservation track, and a ruler:
 
 ![DNA alignment preview](images/readme-preview-3.png)
 
