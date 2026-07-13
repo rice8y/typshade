@@ -1,4 +1,4 @@
-//! Minimal Typshade alignment example.
+/// Minimal Typshade alignment example.
 
 #import "../package/lib.typ": *
 

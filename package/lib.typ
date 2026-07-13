@@ -1,10 +1,10 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Public entrypoint that re-exports the complete Typshade API.
-//!
-//! Import this module to render alignments, compose Selection DSL expressions,
-//! run analyses, and use Typshade's presets and data-aware recipes.
+/// Public entrypoint that re-exports the complete Typshade API.
+///
+/// Import this module to render alignments, compose Selection DSL expressions,
+/// run analyses, and use Typshade's presets and data-aware recipes.
 
 /// Selection annotations, motif labels, metric graphs, and PDB geometry helpers.
 #import "internal/interface/annotations.typ": *

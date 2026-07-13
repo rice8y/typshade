@@ -1,4 +1,4 @@
-//! Example demonstrating region selections and annotations.
+/// Example demonstrating region selections and annotations.
 
 #import "../package/lib.typ": shade, color-scheme, consensus-track, emphasize, highlight, mark, ruler-track, scoring-mode, tint
 

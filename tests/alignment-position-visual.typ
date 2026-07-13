@@ -1,4 +1,4 @@
-//! Visual regression fixture for alignment positioning.
+/// Visual regression fixture for alignment positioning.
 
 #import "../package/lib.typ": *
 

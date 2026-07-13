@@ -1,4 +1,4 @@
-//! Compact alignment used in the README overview.
+/// Compact alignment used in the README overview.
 
 #import "../package/lib.typ": *
 

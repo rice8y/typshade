@@ -1,4 +1,4 @@
-//! Smoke tests for supported input and annotation formats.
+/// Smoke tests for supported input and annotation formats.
 
 #import "../package/lib.typ": *
 

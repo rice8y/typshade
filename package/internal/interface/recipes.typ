@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Data-aware figure recipes that choose useful defaults automatically.
+/// Data-aware figure recipes that choose useful defaults automatically.
 
 #import "../engine/config.typ" as _config
 #import "../engine/commands.typ" as _commands
@@ -372,21 +372,22 @@
 
 /// Create an adaptive publication-ready figure recipe.
 ///
-/// - `mode`: Combination or scoring mode.
-/// - `similarity`: Similarity color scheme used by the recipe.
-/// - `threshold`: Percentage or score threshold used by the operation.
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `region`: Optional region used to focus the recipe.
-/// - `line-length`: Residues per line, or `auto` to choose from the data.
-/// - `ruler`: Ruler enablement, position, or configuration.
-/// - `every`: Interval between generated ruler labels.
-/// - `conservation`: Conservation shading configuration.
-/// - `logo`: Logo configuration or enablement value.
-/// - `motifs`: Motif definitions or `auto` for data-aware discovery.
-/// - `highlights`: Selection highlights included by the recipe.
-/// - `theme`: Theme name or override dictionary.
-/// - `annotations`: Additional annotation commands applied by the recipe.
-/// - `commands`: Command values applied in order.
+/// - mode (str): Combination or scoring mode.
+/// - similarity (str, dictionary): Similarity color scheme used by the recipe.
+/// - threshold (int, float, none, auto): Percentage or score threshold used by the operation.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - region (str, dictionary, auto, none): Optional region used to focus the recipe.
+/// - line-length (int, auto, none): Residues per line, or `auto` to choose from the data.
+/// - ruler (str, bool, dictionary): Ruler enablement, position, or configuration.
+/// - every (int, none): Interval between generated ruler labels.
+/// - conservation (bool, dictionary, auto, none): Conservation shading configuration.
+/// - logo (str, bool, dictionary, auto, none): Logo configuration or enablement value.
+/// - motifs (array, dictionary, auto, none): Motif definitions or `auto` for data-aware discovery.
+/// - highlights (array, dictionary): Selection highlights included by the recipe.
+/// - theme (str, dictionary, none): Theme name or override dictionary.
+/// - annotations (array, dictionary): Additional annotation commands applied by the recipe.
+/// - commands (array, dictionary): Command values applied in order.
+/// -> dictionary
 #let publication(
   mode: "similar",
   similarity: "blues",
@@ -455,18 +456,19 @@
 
 /// Create a recipe that discovers and annotates sequence motifs.
 ///
-/// - `motifs`: Motif definitions or `auto` for data-aware discovery.
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `region`: Optional region used to focus the recipe.
-/// - `line-length`: Residues per line, or `auto` to choose from the data.
-/// - `similarity`: Similarity color scheme used by the recipe.
-/// - `threshold`: Percentage or score threshold used by the operation.
-/// - `logo`: Logo configuration or enablement value.
-/// - `conservation`: Conservation shading configuration.
-/// - `graph`: Metric-graph enablement or configuration.
-/// - `theme`: Theme name or override dictionary.
-/// - `highlights`: Selection highlights included by the recipe.
-/// - `commands`: Command values applied in order.
+/// - motifs (array, dictionary, auto, none): Motif definitions or `auto` for data-aware discovery.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - region (str, dictionary, auto, none): Optional region used to focus the recipe.
+/// - line-length (int, auto, none): Residues per line, or `auto` to choose from the data.
+/// - similarity (str, dictionary): Similarity color scheme used by the recipe.
+/// - threshold (int, float, none, auto): Percentage or score threshold used by the operation.
+/// - logo (str, bool, dictionary, auto, none): Logo configuration or enablement value.
+/// - conservation (bool, dictionary, auto, none): Conservation shading configuration.
+/// - graph (bool, dictionary, auto): Metric-graph enablement or configuration.
+/// - theme (str, dictionary, none): Theme name or override dictionary.
+/// - highlights (array, dictionary): Selection highlights included by the recipe.
+/// - commands (array, dictionary): Command values applied in order.
+/// -> dictionary
 #let motif-map(
   motifs,
   sequence: 1,
@@ -537,19 +539,20 @@
 
 /// Create a recipe combining an alignment with structural tracks.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `topology`: Topology annotation source.
-/// - `secondary`: Secondary-structure annotation source.
-/// - `hmmtop`: HMMTOP annotation source.
-/// - `hmmtop-sequence`: Source sequence identifier used by HMMTOP data.
-/// - `region`: Optional region used to focus the recipe.
-/// - `line-length`: Residues per line, or `auto` to choose from the data.
-/// - `similarity`: Similarity color scheme used by the recipe.
-/// - `threshold`: Percentage or score threshold used by the operation.
-/// - `ruler`: Ruler enablement, position, or configuration.
-/// - `conservation`: Conservation shading configuration.
-/// - `theme`: Theme name or override dictionary.
-/// - `commands`: Command values applied in order.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - topology (any): Topology annotation source.
+/// - secondary (any): Secondary-structure annotation source.
+/// - hmmtop (any): HMMTOP annotation source.
+/// - hmmtop-sequence (str, none): Source sequence identifier used by HMMTOP data.
+/// - region (str, dictionary, auto, none): Optional region used to focus the recipe.
+/// - line-length (int, auto, none): Residues per line, or `auto` to choose from the data.
+/// - similarity (str, dictionary): Similarity color scheme used by the recipe.
+/// - threshold (int, float, none, auto): Percentage or score threshold used by the operation.
+/// - ruler (str, bool, dictionary): Ruler enablement, position, or configuration.
+/// - conservation (bool, dictionary, auto, none): Conservation shading configuration.
+/// - theme (str, dictionary, none): Theme name or override dictionary.
+/// - commands (array, dictionary): Command values applied in order.
+/// -> dictionary
 #let structure-map(
   sequence,
   topology: none,
@@ -613,16 +616,17 @@
 
 /// Create a recipe for sequence-logo analysis.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `region`: Optional region used to focus the recipe.
-/// - `line-length`: Residues per line, or `auto` to choose from the data.
-/// - `colors`: Color scheme or explicit color configuration.
-/// - `subfamily`: Sequence subset used for subfamily analysis.
-/// - `negative`: Whether negative subfamily logo values are displayed.
-/// - `relevance`: Relevance threshold or marker configuration.
-/// - `conservation`: Conservation shading configuration.
-/// - `theme`: Theme name or override dictionary.
-/// - `commands`: Command values applied in order.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - region (str, dictionary, auto, none): Optional region used to focus the recipe.
+/// - line-length (int, auto, none): Residues per line, or `auto` to choose from the data.
+/// - colors (str, array, dictionary, none, auto): Color scheme or explicit color configuration.
+/// - subfamily (array, none): Sequence subset used for subfamily analysis.
+/// - negative (bool, auto): Whether negative subfamily logo values are displayed.
+/// - relevance (int, float, dictionary, auto, none): Relevance threshold or marker configuration.
+/// - conservation (bool, dictionary, auto, none): Conservation shading configuration.
+/// - theme (str, dictionary, none): Theme name or override dictionary.
+/// - commands (array, dictionary): Command values applied in order.
+/// -> dictionary
 #let logo-analysis(
   sequence: 1,
   region: none,
@@ -698,15 +702,16 @@
 
 /// Create a compact alignment overview recipe.
 ///
-/// - `mode`: Combination or scoring mode.
-/// - `colors`: Color scheme or explicit color configuration.
-/// - `line-length`: Residues per line, or `auto` to choose from the data.
-/// - `names`: Sequence-name visibility, position, or configuration.
-/// - `numbers`: Numbering visibility, position, or configuration.
-/// - `conservation`: Conservation shading configuration.
-/// - `ruler`: Ruler enablement, position, or configuration.
-/// - `theme`: Theme name or override dictionary.
-/// - `commands`: Command values applied in order.
+/// - mode (str): Combination or scoring mode.
+/// - colors (str, array, dictionary, none, auto): Color scheme or explicit color configuration.
+/// - line-length (int, auto, none): Residues per line, or `auto` to choose from the data.
+/// - names (str, bool, dictionary): Sequence-name visibility, position, or configuration.
+/// - numbers (bool, str, dictionary): Numbering visibility, position, or configuration.
+/// - conservation (bool, dictionary, auto, none): Conservation shading configuration.
+/// - ruler (str, bool, dictionary): Ruler enablement, position, or configuration.
+/// - theme (str, dictionary, none): Theme name or override dictionary.
+/// - commands (array, dictionary): Command values applied in order.
+/// -> dictionary
 #let overview(
   mode: "similar",
   colors: none,
@@ -778,9 +783,10 @@
 
 /// Resolve a recipe into concrete shade options and commands.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `format`: Input format, or `auto` to detect it.
-/// - `figure`: Recipe value or concrete figure options to resolve.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - figure (array, dictionary): Recipe value or concrete figure options to resolve.
+/// -> dictionary
 #let resolve-figure(source, format, figure) = {
   let out = ()
   let items = if type(figure) == array { figure } else { (figure,) }

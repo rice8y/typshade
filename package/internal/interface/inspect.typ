@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Diagnostic tables and inspection helpers for alignments and selections.
+/// Diagnostic tables and inspection helpers for alignments and selections.
 
 #import "../engine/layout.typ" as _layout
 #import "../engine/commands.typ" as _commands
@@ -38,8 +38,9 @@
 
 /// Render a compact summary of an alignment.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `format`: Input format, or `auto` to detect it.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// -> content
 #let alignment-summary(source, format: auto) = {
   let alignment = _parser.read-alignment(source, format: format)
   let names = alignment.at("sequences").map(seq => seq.at("name")).join(", ")
@@ -70,10 +71,11 @@
 
 /// Return the columns matched by a Selection DSL expression.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `format`: Input format, or `auto` to detect it.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// -> str
 #let selection-preview(source, sequence, selection, format: auto) = {
   let alignment = _parser.read-alignment(source, format: format)
   let resolved-sequence = alignment.at("sequences").at(_logo._resolve-sequence(alignment, sequence))
@@ -89,8 +91,9 @@
 
 /// Render sequence names, lengths, and ungapped sequences.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `format`: Input format, or `auto` to detect it.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// -> content
 #let sequence-list(source, format: auto) = {
   let alignment = _parser.read-alignment(source, format: format)
   let headers = ([Name], [Length], [Non-gap residues])
@@ -114,10 +117,11 @@
 
 /// Render named selections and their resolved positions.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `items`: Selection expressions or dictionaries containing `name`, `selection`, and optional `sequence` fields.
-/// - `format`: Input format, or `auto` to detect it.
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - items (arguments): Selection expressions or dictionaries containing `name`, `selection`, and optional `sequence` fields.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// -> content
 #let selection-table(source, ..items, format: auto, sequence: 1) = {
   let headers = ([Name], [Selection], [Positions], [Count])
   let rows = ()
@@ -144,9 +148,10 @@
 
 /// Render diagnostic information for a configured alignment.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `format`: Input format, or `auto` to detect it.
-/// - `commands`: Command values applied in order.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - commands (array, dictionary): Command values applied in order.
+/// -> content
 #let alignment-debug(source, format: auto, commands: ()) = {
   let prepared = _prepared-alignment(source, format, commands)
   let alignment = prepared.at("alignment")
@@ -184,11 +189,12 @@
 
 /// Inspect the resolved style and metadata of one alignment cell.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `column`: One-based alignment column to inspect.
-/// - `format`: Input format, or `auto` to detect it.
-/// - `commands`: Command values applied in order.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - column (int): One-based alignment column to inspect.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - commands (array, dictionary): Command values applied in order.
+/// -> content
 #let cell-inspect(source, sequence, column, format: auto, commands: ()) = {
   let prepared = _prepared-alignment(source, format, commands)
   let alignment = prepared.at("alignment")

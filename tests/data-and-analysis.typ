@@ -1,4 +1,4 @@
-//! Assertions and render checks for data and analysis helpers.
+/// Assertions and render checks for data and analysis helpers.
 
 #import "../package/lib.typ": *
 

@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Low-level configuration model and command constructors used by the public API.
+/// Low-level configuration model and command constructors used by the public API.
 
 #import "../model/parser.typ": _chars, _lower, _upper, read-dssp, read-hmmtop, read-phd-secondary, read-phd-topology, read-stride, read-tcoffee
 #import "../model/palette.typ": _dna-groups, _dna-sims, _functional-presets, _pep-groups, _pep-sims, resolve-color
@@ -78,8 +78,9 @@
 
 /// Calculate the molecular weight of a protein sequence.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `unit`: Unit used for the returned molecular weight.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - unit (str): Unit used for the returned molecular weight.
+/// -> str
 #let molweight(sequence, unit: "Da") = {
   let total = 0.0
   for residue in _chars(_clean-residue-string(sequence)) {
@@ -94,8 +95,9 @@
 
 /// Calculate the approximate net charge of a protein sequence.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `termini`: Terminal charge convention.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - termini (str): Terminal charge convention.
+/// -> str
 #let charge(sequence, termini: "o") = {
   let total = 0.0
   for residue in _chars(_clean-residue-string(sequence)) {
@@ -358,219 +360,266 @@
 
 /// Create the low-level `sequence-type` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let sequence-type(value) = _command("sequence-type", (value: value))
 /// Create the low-level `scoring-mode` configuration command.
 ///
-/// - `mode`: Combination or scoring mode.
-/// - `option`: Optional mode-specific value.
+/// - mode (str): Combination or scoring mode.
+/// - option (any): Optional mode-specific value.
+/// -> dictionary
 #let scoring-mode(mode, option: none) = _command("scoring-mode", (mode: mode, option: option))
 /// Create the low-level `color-scheme` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let color-scheme(name) = _command("color-scheme", (name: name))
 /// Create the low-level `define-color-scheme` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let define-color-scheme(name) = _command("define-color-scheme", (name: name))
 /// Create the low-level `threshold` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let threshold(value) = _command("threshold", (value: value))
 /// Create the low-level `shade-all-residues` configuration command.
+/// -> dictionary
 #let shade-all-residues() = _command("shade-all-residues", (:))
 /// Create the low-level `all-match-threshold` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let all-match-threshold(value: 100) = _command("all-match-threshold", (value: value))
 /// Create the low-level `disable-all-match-threshold` configuration command.
+/// -> dictionary
 #let disable-all-match-threshold() = _command("disable-all-match-threshold", (:))
 /// Hide all match positions.
+/// -> dictionary
 #let hide-all-match-positions() = _command("hide-all-match-positions", (:))
 /// Show all match positions.
+/// -> dictionary
 #let show-all-match-positions() = _command("show-all-match-positions", (:))
 /// Create the low-level `weight-table` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let weight-table(name) = _command("weight-table", (name: name))
 /// Create the low-level `set-weight` configuration command.
 ///
-/// - `residue-a`: First residue symbol or number.
-/// - `residue-b`: Second residue symbol or number.
-/// - `value`: Value for this setting.
+/// - residue-a (int, str): First residue symbol or number.
+/// - residue-b (int, str): Second residue symbol or number.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let set-weight(residue-a, residue-b, value) = _command("set-weight", (residue-a: residue-a, residue-b: residue-b, value: value))
 /// Create the low-level `gap-penalty` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let gap-penalty(value) = _command("gap-penalty", (value: value))
 /// Create the low-level `residues-per-line` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let residues-per-line(value) = _command("residues-per-line", (value: value))
 /// Create the low-level `auto-layout` configuration command.
 ///
-/// - `fit`: Container-fitting strategy used by automatic layout.
-/// - `min`: Minimum permitted value.
-/// - `max`: Maximum permitted value, or `none` for no explicit maximum.
+/// - fit (str, bool, dictionary, none): Container-fitting strategy used by automatic layout.
+/// - min (int, float, none): Minimum permitted value.
+/// - max (int, float, none): Maximum permitted value, or `none` for no explicit maximum.
+/// -> dictionary
 #let auto-layout(fit: "container", min: 1, max: none) = _command("auto-layout", (fit: fit, min: min, max: max))
 /// Create the low-level `auto-page` configuration command.
 ///
-/// - `blocks`: Alignment blocks per page, or `auto` to calculate the count.
-/// - `repeat-legend`: Whether each automatic page repeats the legend.
+/// - blocks (int, auto): Alignment blocks per page, or `auto` to calculate the count.
+/// - repeat-legend (bool): Whether each automatic page repeats the legend.
+/// -> dictionary
 #let auto-page(blocks: auto, repeat-legend: true) = _command("auto-page", (blocks: blocks, repeat-legend: repeat-legend))
 /// Create a numbering track command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - position (str, none): Track side or alignment position to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let numbering-track(position: "right", color: none) = _command("numbering-track", (position: position, color: color))
 /// Disable numbering track.
+/// -> dictionary
 #let no-numbering-track() = _command("no-numbering-track", (:))
 /// Create a names track command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - position (str, none): Track side or alignment position to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let names-track(position: "left", color: none) = _command("names-track", (position: position, color: color))
 /// Disable names track.
+/// -> dictionary
 #let no-names-track() = _command("no-names-track", (:))
 /// Create the low-level `sequence-name` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `name`: Name used by the generated command or rendered element.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let sequence-name(sequence, name) = _command("sequence-name", (sequence: sequence, name: name))
 /// Create the low-level `names-color` configuration command.
 ///
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let names-color(color) = _command("names-color", (color: color))
 /// Create the low-level `sequence-name-color` configuration command.
 ///
-/// - `sequences`: Sequence names, indices, or selectors to target.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - sequences (int, str, array): Sequence names, indices, or selectors to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let sequence-name-color(sequences, color) = _command("sequence-name-color", (sequences: sequences, color: color))
 /// Hide sequence name.
 ///
-/// - `sequences`: Sequence names, indices, or selectors to target.
+/// - sequences (int, str, array): Sequence names, indices, or selectors to target.
+/// -> dictionary
 #let hide-sequence-name(sequences) = _command("hide-sequence-name", (sequences: sequences))
 /// Create the low-level `numbering-color` configuration command.
 ///
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let numbering-color(color) = _command("numbering-color", (color: color))
 /// Create the low-level `sequence-number-color` configuration command.
 ///
-/// - `sequences`: Sequence names, indices, or selectors to target.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - sequences (int, str, array): Sequence names, indices, or selectors to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let sequence-number-color(sequences, color) = _command("sequence-number-color", (sequences: sequences, color: color))
 /// Hide sequence number.
 ///
-/// - `sequences`: Sequence names, indices, or selectors to target.
+/// - sequences (int, str, array): Sequence names, indices, or selectors to target.
+/// -> dictionary
 #let hide-sequence-number(sequences) = _command("hide-sequence-number", (sequences: sequences))
 /// Create a consensus track command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `scale`: Scale placement or scale configuration.
-/// - `name`: Name used by the generated command or rendered element.
+/// - position (str, none): Track side or alignment position to target.
+/// - scale (str, dictionary, none): Scale placement or scale configuration.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let consensus-track(position: "bottom", scale: none, name: none) = _command("consensus-track", (position: position, scale: scale, name: name))
 /// Disable consensus track.
+/// -> dictionary
 #let no-consensus-track() = _command("no-consensus-track", (:))
 /// Create the low-level `consensus-name` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let consensus-name(name) = _command("consensus-name", (name: name))
 /// Create the low-level `language` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let language(name) = _command("language", (name: name))
 /// Create the low-level `consensus-symbols` configuration command.
 ///
-/// - `none-symbol`: Consensus symbol used for non-conserved columns.
-/// - `conserved-symbol`: Consensus symbol used for conserved columns.
-/// - `allmatch-symbol`: Consensus symbol used for fully conserved columns.
+/// - none-symbol (str): Consensus symbol used for non-conserved columns.
+/// - conserved-symbol (str): Consensus symbol used for conserved columns.
+/// - allmatch-symbol (str): Consensus symbol used for fully conserved columns.
+/// -> dictionary
 #let consensus-symbols(none-symbol, conserved-symbol, allmatch-symbol) = _command("consensus-symbols", ("none": none-symbol, conserved: conserved-symbol, allmatch: allmatch-symbol))
 /// Create the low-level `consensus-colors` configuration command.
 ///
-/// - `none-fg`: Foreground color for non-conserved consensus symbols.
-/// - `none-bg`: Background color for non-conserved consensus symbols.
-/// - `conserved-fg`: Foreground color for conserved consensus symbols.
-/// - `conserved-bg`: Background color for conserved consensus symbols.
-/// - `allmatch-fg`: Foreground color for fully conserved consensus symbols.
-/// - `allmatch-bg`: Background color for fully conserved consensus symbols.
+/// - none-fg (color, str): Foreground color for non-conserved consensus symbols.
+/// - none-bg (color, str): Background color for non-conserved consensus symbols.
+/// - conserved-fg (color, str): Foreground color for conserved consensus symbols.
+/// - conserved-bg (color, str): Background color for conserved consensus symbols.
+/// - allmatch-fg (color, str): Foreground color for fully conserved consensus symbols.
+/// - allmatch-bg (color, str): Background color for fully conserved consensus symbols.
+/// -> dictionary
 #let consensus-colors(none-fg: "Black", none-bg: "White", conserved-fg: "Black", conserved-bg: "White", allmatch-fg: "Black", allmatch-bg: "White") = _command("consensus-colors", (none-fg: none-fg, none-bg: none-bg, conserved-fg: conserved-fg, conserved-bg: conserved-bg, allmatch-fg: allmatch-fg, allmatch-bg: allmatch-bg))
 /// Create the low-level `residue-style` configuration command.
 ///
-/// - `target`: Alignment element or residue class to configure.
-/// - `fg`: Foreground color.
-/// - `bg`: Background color.
-/// - `case`: Letter case applied to rendered residues.
-/// - `style`: Visual or typographic style.
+/// - target (str): Alignment element or residue class to configure.
+/// - fg (color, str, none): Foreground color.
+/// - bg (color, str, none): Background color.
+/// - case (str): Letter case applied to rendered residues.
+/// - style (str, dictionary, none): Visual or typographic style.
+/// -> dictionary
 #let residue-style(target, fg, bg, case: "upper", style: "normal") = _command("residue-style", (target: target, fg: fg, bg: bg, case: case, style: style))
 /// Create the low-level `cell-style` configuration command.
 ///
-/// - `callback`: Function called with cell context to return style overrides.
+/// - callback (function): Function called with cell context to return style overrides.
+/// -> dictionary
 #let cell-style(callback) = _command("cell-style", (callback: callback))
 /// Clear functional groups.
+/// -> dictionary
 #let clear-functional-groups() = _command("clear-functional-groups", (:))
 /// Create the low-level `functional-group` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
-/// - `residues`: Residue symbols or positions to target.
-/// - `fg`: Foreground color.
-/// - `bg`: Background color.
-/// - `case`: Letter case applied to rendered residues.
-/// - `style`: Visual or typographic style.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// - residues (str, array, arguments): Residue symbols or positions to target.
+/// - fg (color, str, none): Foreground color.
+/// - bg (color, str, none): Background color.
+/// - case (str): Letter case applied to rendered residues.
+/// - style (str, dictionary, none): Visual or typographic style.
+/// -> dictionary
 #let functional-group(name, residues, fg, bg, case: "upper", style: "normal") = _command("functional-group", (name: name, residues: residues, fg: fg, bg: bg, case: case, style: style))
 /// Create the low-level `functional-style` configuration command.
 ///
-/// - `residue`: Residue symbol or one-based residue number, as appropriate.
-/// - `fg`: Foreground color.
-/// - `bg`: Background color.
-/// - `case`: Letter case applied to rendered residues.
-/// - `style`: Visual or typographic style.
+/// - residue (int, str): Residue symbol or one-based residue number, as appropriate.
+/// - fg (color, str, none): Foreground color.
+/// - bg (color, str, none): Background color.
+/// - case (str): Letter case applied to rendered residues.
+/// - style (str, dictionary, none): Visual or typographic style.
+/// -> dictionary
 #let functional-style(residue, fg, bg, case: "upper", style: "normal") = _command("functional-style", (residue: residue, fg: fg, bg: bg, case: case, style: style))
 /// Create a ruler track command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `steps`: Interval between ruler labels.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - position (str, none): Track side or alignment position to target.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - steps (int, none): Interval between ruler labels.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let ruler-track(position: "top", sequence: 1, steps: none, color: none) = _command("ruler-track", (position: position, sequence: sequence, steps: steps, color: color))
 /// Disable ruler track.
 ///
-/// - `position`: Track side or alignment position to target.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let no-ruler-track(position: none) = _command("no-ruler-track", (position: position))
 /// Create the low-level `ruler-steps` configuration command.
 ///
-/// - `value`: Value for this setting.
-/// - `position`: Track side or alignment position to target.
+/// - value (any): Value for this setting.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let ruler-steps(value, position: none) = _command("ruler-steps", (value: value, position: position))
 /// Create the low-level `ruler-color` configuration command.
 ///
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
-/// - `position`: Track side or alignment position to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let ruler-color(color, position: none) = _command("ruler-color", (color: color, position: position))
 /// Create the low-level `ruler-name` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
-/// - `position`: Track side or alignment position to target.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let ruler-name(name, position: none) = _command("ruler-name", (name: name, position: position))
 /// Create the low-level `ruler-name-color` configuration command.
 ///
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
-/// - `position`: Track side or alignment position to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let ruler-name-color(color, position: none) = _command("ruler-name-color", (color: color, position: position))
 /// Create the low-level `ruler-marker` configuration command.
 ///
-/// - `number`: Residue number at which to place the marker.
-/// - `text`: Text displayed by the generated annotation or label.
-/// - `position`: Track side or alignment position to target.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - number (int): Residue number at which to place the marker.
+/// - text (str, content): Text displayed by the generated annotation or label.
+/// - position (str, none): Track side or alignment position to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let ruler-marker(number, text, position: none, color: none) = _command("ruler-marker", (number: number, text: text, position: position, color: color))
 /// Create the low-level `ruler-space` configuration command.
 ///
-/// - `value`: Value for this setting.
-/// - `position`: Track side or alignment position to target.
+/// - value (any): Value for this setting.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let ruler-space(value, position: none) = _command("ruler-space", (value: value, position: position))
 /// Create the low-level `rotate-ruler` configuration command.
 ///
-/// - `args`: Additional positional or named options forwarded to the command.
+/// - args (arguments): Additional positional or named options forwarded to the command.
+/// -> dictionary
 #let rotate-ruler(..args) = {
   let positional = args.pos()
   let position = if positional.len() > 0 { positional.first() } else { args.named().at("position", default: none) }
@@ -578,7 +627,8 @@
 }
 /// Create the low-level `unrotate-ruler` configuration command.
 ///
-/// - `args`: Additional positional or named options forwarded to the command.
+/// - args (arguments): Additional positional or named options forwarded to the command.
+/// -> dictionary
 #let unrotate-ruler(..args) = {
   let positional = args.pos()
   let position = if positional.len() > 0 { positional.first() } else { args.named().at("position", default: none) }
@@ -586,79 +636,96 @@
 }
 /// Create the low-level `gap-char` configuration command.
 ///
-/// - `symbol`: Character used for the configured residue class.
+/// - symbol (str): Character used for the configured residue class.
+/// -> dictionary
 #let gap-char(symbol) = _command("gap-char", (symbol: symbol))
 /// Create the low-level `gap-rule` configuration command.
 ///
-/// - `thickness`: Line or rule thickness.
+/// - thickness (length): Line or rule thickness.
+/// -> dictionary
 #let gap-rule(thickness) = _command("gap-rule", (thickness: thickness))
 /// Create the low-level `gap-colors` configuration command.
 ///
-/// - `foreground`: Foreground color.
-/// - `background`: Background color.
+/// - foreground (color, str, none): Foreground color.
+/// - background (color, str, none): Background color.
+/// -> dictionary
 #let gap-colors(foreground, background) = _command("gap-colors", (foreground: foreground, background: background))
 /// Create the low-level `stop-char` configuration command.
 ///
-/// - `symbol`: Character used for the configured residue class.
+/// - symbol (str): Character used for the configured residue class.
+/// -> dictionary
 #let stop-char(symbol) = _command("stop-char", (symbol: symbol))
 /// Create the low-level `peptide-groups` configuration command.
 ///
-/// - `groups`: Optional residue-group definitions.
+/// - groups (array, dictionary, none): Optional residue-group definitions.
+/// -> dictionary
 #let peptide-groups(groups) = _command("peptide-groups", (groups: groups))
 /// Create the low-level `dna-groups` configuration command.
 ///
-/// - `groups`: Optional residue-group definitions.
+/// - groups (array, dictionary, none): Optional residue-group definitions.
+/// -> dictionary
 #let dna-groups(groups) = _command("dna-groups", (groups: groups))
 /// Create the low-level `peptide-similarities` configuration command.
 ///
-/// - `residue`: Residue symbol or one-based residue number, as appropriate.
-/// - `similars`: Residues treated as similar to the target residue.
+/// - residue (int, str): Residue symbol or one-based residue number, as appropriate.
+/// - similars (str, array): Residues treated as similar to the target residue.
+/// -> dictionary
 #let peptide-similarities(residue, similars) = _command("peptide-similarities", (residue: residue, similars: similars))
 /// Create the low-level `dna-similarities` configuration command.
 ///
-/// - `residue`: Residue symbol or one-based residue number, as appropriate.
-/// - `similars`: Residues treated as similar to the target residue.
+/// - residue (int, str): Residue symbol or one-based residue number, as appropriate.
+/// - similars (str, array): Residues treated as similar to the target residue.
+/// -> dictionary
 #let dna-similarities(residue, similars) = _command("dna-similarities", (residue: residue, similars: similars))
 /// Create the low-level `start-number` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `start`: Inclusive start position or replacement starting number.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - start (int, str, none): Inclusive start position or replacement starting number.
+/// - selection (str, dictionary, none): Residue range or Selection DSL expression to resolve.
+/// -> dictionary
 #let start-number(sequence, start, selection: none) = _command("start-number", (sequence: sequence, start: start, selection: selection))
 /// Allow zero numbering.
+/// -> dictionary
 #let allow-zero-numbering() = _command("allow-zero-numbering", (:))
 /// Disallow zero numbering.
+/// -> dictionary
 #let disallow-zero-numbering() = _command("disallow-zero-numbering", (:))
 /// Create the low-level `sequence-length` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `length`: Declared sequence length or output extent.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - length (int): Declared sequence length or output extent.
+/// -> dictionary
 #let sequence-length(sequence, length) = _command("sequence-length", (sequence: sequence, length: length))
 /// Create the low-level `sequence-window` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `start`: Inclusive start position or replacement starting number.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - start (int, str, none): Inclusive start position or replacement starting number.
+/// -> dictionary
 #let sequence-window(sequence, selection, start: none) = _command("sequence-window", (sequence: sequence, selection: selection, start: start))
 /// Create the low-level `domain` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// -> dictionary
 #let domain(sequence, selection) = sequence-window(sequence, selection)
 /// Create the low-level `domain-gap-rule` configuration command.
 ///
-/// - `thickness`: Line or rule thickness.
+/// - thickness (length): Line or rule thickness.
+/// -> dictionary
 #let domain-gap-rule(thickness) = gap-rule(thickness)
 /// Create the low-level `domain-gap-colors` configuration command.
 ///
-/// - `foreground`: Foreground color.
-/// - `background`: Background color.
+/// - foreground (color, str, none): Foreground color.
+/// - background (color, str, none): Background color.
+/// -> dictionary
 #let domain-gap-colors(foreground, background) = gap-colors(foreground, background)
 /// Create the low-level `region-highlight` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `args`: Additional positional or named options forwarded to the command.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - args (arguments): Additional positional or named options forwarded to the command.
+/// -> dictionary
 #let region-highlight(sequence, selection, ..args) = {
   let positional = args.pos()
   let named = args.named()
@@ -671,9 +738,10 @@
 }
 /// Create the low-level `highlight-block` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `args`: Additional positional or named options forwarded to the command.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - args (arguments): Additional positional or named options forwarded to the command.
+/// -> dictionary
 #let highlight-block(sequence, selection, ..args) = {
   let command = region-highlight(sequence, selection, ..args)
   command.insert("all", args.named().at("apply-to-all", default: true))
@@ -681,106 +749,128 @@
 }
 /// Create the low-level `region-color-scheme` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `scheme`: Named color scheme.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - scheme (str, dictionary): Named color scheme.
+/// -> dictionary
 #let region-color-scheme(sequence, selection, scheme) = region-highlight(sequence, selection, scheme: scheme, apply-to-all: true)
 /// Create the low-level `region-tint` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `intensity`: Tint strength.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - intensity (str, int, float): Tint strength.
+/// -> dictionary
 #let region-tint(sequence, selection, intensity: "medium") = _command("region-tint", (sequence: sequence, selection: selection, intensity: intensity))
 /// Create the low-level `tint-block` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `intensity`: Tint strength.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - intensity (str, int, float): Tint strength.
+/// -> dictionary
 #let tint-block(sequence, selection, intensity: "medium") = region-tint(sequence, selection, intensity: intensity)
 /// Create the low-level `tint-default` configuration command.
 ///
-/// - `effect`: Named default tint effect.
+/// - effect (str): Named default tint effect.
+/// -> dictionary
 #let tint-default(effect) = _command("tint-default", (effect: effect))
 /// Create the low-level `region-lower` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// -> dictionary
 #let region-lower(sequence, selection) = _command("region-lower", (sequence: sequence, selection: selection))
 /// Create the low-level `lower-block` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// -> dictionary
 #let lower-block(sequence, selection) = region-lower(sequence, selection)
 /// Create the low-level `region-emphasis` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `style`: Visual or typographic style.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - style (str, dictionary, none): Visual or typographic style.
+/// -> dictionary
 #let region-emphasis(sequence, selection, style: "italic") = _command("region-emphasis", (sequence: sequence, selection: selection, style: style))
 /// Create the low-level `emphasis-block` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `style`: Visual or typographic style.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - style (str, dictionary, none): Visual or typographic style.
+/// -> dictionary
 #let emphasis-block(sequence, selection, style: "italic") = region-emphasis(sequence, selection, style: style)
 /// Create the low-level `emphasis-default` configuration command.
 ///
-/// - `style`: Visual or typographic style.
+/// - style (str, dictionary, none): Visual or typographic style.
+/// -> dictionary
 #let emphasis-default(style) = _command("emphasis-default", (style: style))
 /// Create the low-level `frame-block` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let frame-block(sequence, selection, color: "Red") = _command("frame-block", (sequence: sequence, selection: selection, color: color))
 /// Hide sequence.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// -> dictionary
 #let hide-sequence(sequence) = _command("hide-sequence", (sequence: sequence))
 /// Hide all sequences.
+/// -> dictionary
 #let hide-all-sequences() = _command("hide-all-sequences", (:))
 /// Show all sequences.
+/// -> dictionary
 #let show-all-sequences() = _command("show-all-sequences", (:))
 /// Create the low-level `remove-sequence` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// -> dictionary
 #let remove-sequence(sequence) = _command("remove-sequence", (sequence: sequence))
 /// Disable shade.
 ///
-/// - `sequences`: Sequence names, indices, or selectors to target.
+/// - sequences (int, str, array): Sequence names, indices, or selectors to target.
+/// -> dictionary
 #let no-shade(sequences) = _command("no-shade", (sequences: sequences))
 /// Create the low-level `separation-line` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// -> dictionary
 #let separation-line(sequence) = _command("separation-line", (sequence: sequence))
 /// Create the low-level `sequence-order` configuration command.
 ///
-/// - `order`: Sequence order expressed as names or one-based indices.
+/// - order (array): Sequence order expressed as names or one-based indices.
+/// -> dictionary
 #let sequence-order(order) = _command("sequence-order", (order: order))
 /// Create the low-level `feature` configuration command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `style`: Visual or typographic style.
-/// - `text`: Text displayed by the generated annotation or label.
+/// - position (str, none): Track side or alignment position to target.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - style (str, dictionary, none): Visual or typographic style.
+/// - text (str, content): Text displayed by the generated annotation or label.
+/// -> dictionary
 #let feature(position, sequence, selection, style: "", text: "") = _command("feature", (position: position, sequence: sequence, selection: selection, style: style, text: text))
 /// Create the low-level `feature-rule` configuration command.
 ///
-/// - `thickness`: Line or rule thickness.
+/// - thickness (length): Line or rule thickness.
+/// -> dictionary
 #let feature-rule(thickness) = _command("feature-rule", (thickness: thickness))
 /// Create the low-level `codon` configuration command.
 ///
-/// - `residue`: Residue symbol or one-based residue number, as appropriate.
-/// - `triplets`: Comma-separated codons assigned to the residue.
+/// - residue (int, str): Residue symbol or one-based residue number, as appropriate.
+/// - triplets (str, array): Comma-separated codons assigned to the residue.
+/// -> dictionary
 #let codon(residue, triplets) = _command("codon", (residue: residue, triplets: triplets))
 /// Create the low-level `genetic-code` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let genetic-code(name) = _command("genetic-code", (name: name))
 /// Create the low-level `backtranslation-label` configuration command.
 ///
-/// - `args`: Additional positional or named options forwarded to the command.
+/// - args (arguments): Additional positional or named options forwarded to the command.
+/// -> dictionary
 #let backtranslation-label(..args) = {
   let positional = args.pos()
   let style = if positional.len() > 0 { positional.last() } else { args.named().at("style", default: "alternating") }
@@ -789,7 +879,8 @@
 }
 /// Create the low-level `backtranslation-text` configuration command.
 ///
-/// - `args`: Additional positional or named options forwarded to the command.
+/// - args (arguments): Additional positional or named options forwarded to the command.
+/// -> dictionary
 #let backtranslation-text(..args) = {
   let positional = args.pos()
   let style = if positional.len() > 0 { positional.last() } else { args.named().at("style", default: "horizontal") }
@@ -798,324 +889,411 @@
 }
 /// Create the low-level `feature-text-label` configuration command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `name`: Name used by the generated command or rendered element.
+/// - position (str, none): Track side or alignment position to target.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let feature-text-label(position, name) = _command("feature-text-label", (position: position, name: name))
 /// Create the low-level `feature-style-label` configuration command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `name`: Name used by the generated command or rendered element.
+/// - position (str, none): Track side or alignment position to target.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let feature-style-label(position, name) = _command("feature-style-label", (position: position, name: name))
 /// Hide feature text label.
 ///
-/// - `position`: Track side or alignment position to target.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let hide-feature-text-label(position) = _command("hide-feature-text-label", (position: position))
 /// Hide feature style label.
 ///
-/// - `position`: Track side or alignment position to target.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let hide-feature-style-label(position) = _command("hide-feature-style-label", (position: position))
 /// Hide feature text labels.
+/// -> dictionary
 #let hide-feature-text-labels() = _command("hide-feature-text-labels", (:))
 /// Hide feature style labels.
+/// -> dictionary
 #let hide-feature-style-labels() = _command("hide-feature-style-labels", (:))
 /// Create the low-level `feature-text-label-color` configuration command.
 ///
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let feature-text-label-color(color) = _command("feature-text-label-color", (color: color))
 /// Create the low-level `feature-style-label-color` configuration command.
 ///
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let feature-style-label-color(color) = _command("feature-style-label-color", (color: color))
 /// Create the low-level `feature-text-label-color-at` configuration command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - position (str, none): Track side or alignment position to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let feature-text-label-color-at(position, color) = _command("feature-text-label-color-at", (position: position, color: color))
 /// Create the low-level `feature-style-label-color-at` configuration command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - position (str, none): Track side or alignment position to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let feature-style-label-color-at(position, color) = _command("feature-style-label-color-at", (position: position, color: color))
 /// Create the low-level `tcoffee-scores` configuration command.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// -> dictionary
 #let tcoffee-scores(source) = _command("tcoffee-scores", (source: source))
 /// Create a sequence logo track command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `colorset`: Named or explicit residue color set.
+/// - position (str, none): Track side or alignment position to target.
+/// - colorset (str, array, dictionary, none): Named or explicit residue color set.
+/// -> dictionary
 #let sequence-logo-track(position: "top", colorset: none) = _command("sequence-logo-track", (position: position, colorset: colorset))
 /// Disable sequence logo track.
+/// -> dictionary
 #let no-sequence-logo-track() = _command("no-sequence-logo-track", (:))
 /// Create the low-level `frequency-correction` configuration command.
+/// -> dictionary
 #let frequency-correction() = _command("frequency-correction", (:))
 /// Disable frequency correction.
+/// -> dictionary
 #let no-frequency-correction() = _command("no-frequency-correction", (:))
 /// Create the low-level `subfamily` configuration command.
 ///
-/// - `sequences`: Sequence names, indices, or selectors to target.
+/// - sequences (int, str, array): Sequence names, indices, or selectors to target.
+/// -> dictionary
 #let subfamily(sequences) = _command("subfamily", (sequences: sequences))
 /// Create a subfamily logo track command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `colorset`: Named or explicit residue color set.
+/// - position (str, none): Track side or alignment position to target.
+/// - colorset (str, array, dictionary, none): Named or explicit residue color set.
+/// -> dictionary
 #let subfamily-logo-track(position: "top", colorset: none) = _command("subfamily-logo-track", (position: position, colorset: colorset))
 /// Disable subfamily logo track.
+/// -> dictionary
 #let no-subfamily-logo-track() = _command("no-subfamily-logo-track", (:))
 /// Create the low-level `sequence-logo-name` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// -> dictionary
 #let sequence-logo-name(name) = _command("sequence-logo-name", (name: name))
 /// Create the low-level `subfamily-logo-name` configuration command.
 ///
-/// - `name`: Name used by the generated command or rendered element.
-/// - `negative-name`: Optional label for the negative subfamily logo.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// - negative-name (str, none): Optional label for the negative subfamily logo.
+/// -> dictionary
 #let subfamily-logo-name(name, negative-name: none) = _command("subfamily-logo-name", (name: name, negative-name: negative-name))
 /// Create the low-level `logo-scale` configuration command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - position (str, none): Track side or alignment position to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let logo-scale(position: "leftright", color: "Black") = _command("logo-scale", (position: position, color: color))
 /// Disable logo scale.
+/// -> dictionary
 #let no-logo-scale() = _command("no-logo-scale", (:))
 /// Create the low-level `logo-stretch` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let logo-stretch(value) = _command("logo-stretch", (value: value))
 /// Create the low-level `negative-logo-values` configuration command.
+/// -> dictionary
 #let negative-logo-values() = _command("negative-logo-values", (:))
 /// Disable negative logo values.
+/// -> dictionary
 #let no-negative-logo-values() = _command("no-negative-logo-values", (:))
 /// Create the low-level `relevance-threshold` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let relevance-threshold(value) = _command("relevance-threshold", (value: value))
 /// Create the low-level `relevance-marker` configuration command.
 ///
-/// - `char`: Character used by the marker.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - char (str): Character used by the marker.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let relevance-marker(char: "*", color: "Black") = _command("relevance-marker", (char: char, color: color))
 /// Disable relevance marker.
+/// -> dictionary
 #let no-relevance-marker() = _command("no-relevance-marker", (:))
 /// Create the low-level `logo-color` configuration command.
 ///
-/// - `residues`: Residue symbols or positions to target.
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - residues (str, array, arguments): Residue symbols or positions to target.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let logo-color(residues, color) = _command("logo-color", (residues: residues, color: color))
 /// Clear logo colors.
 ///
-/// - `default`: Default value used when no explicit override matches.
+/// - default (any): Default value used when no explicit override matches.
+/// -> dictionary
 #let clear-logo-colors(default: "Black") = _command("clear-logo-colors", (default: default))
 /// Create a legend track command.
 ///
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let legend-track(color: "Black") = _command("legend-track", (color: color))
 /// Disable legend track.
+/// -> dictionary
 #let no-legend-track() = _command("no-legend-track", (:))
 /// Create the low-level `legend-color` configuration command.
 ///
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> dictionary
 #let legend-color(color) = _command("legend-color", (color: color))
 /// Create the low-level `legend-offset` configuration command.
 ///
-/// - `dx`: Horizontal legend offset.
-/// - `dy`: Vertical legend offset.
+/// - dx (length): Horizontal legend offset.
+/// - dy (length): Vertical legend offset.
+/// -> dictionary
 #let legend-offset(dx, dy) = _command("legend-offset", (dx: dx, dy: dy))
 /// Create the low-level `color-swatch` configuration command.
 ///
-/// - `color`: Color accepted by Typst or Typshade's named-color resolver.
+/// - color (color, str, none): Color accepted by Typst or Typshade's named-color resolver.
+/// -> content
 #let color-swatch(color) = box(width: 10pt, height: 10pt, fill: resolve-color(color), stroke: none)[]
 /// Show structure types.
 ///
-/// - `format`: Input format, or `auto` to detect it.
-/// - `types`: Structural annotation types to show or hide.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - types (str, array): Structural annotation types to show or hide.
+/// -> dictionary
 #let show-structure-types(format, types) = _command("show-structure-types", (format: format, types: types))
 /// Hide structure types.
 ///
-/// - `format`: Input format, or `auto` to detect it.
-/// - `types`: Structural annotation types to show or hide.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - types (str, array): Structural annotation types to show or hide.
+/// -> dictionary
 #let hide-structure-types(format, types) = _command("hide-structure-types", (format: format, types: types))
 /// Create the low-level `structure-appearance` configuration command.
 ///
-/// - `format`: Input format, or `auto` to detect it.
-/// - `structure-type`: Structural annotation type to configure.
-/// - `position`: Track side or alignment position to target.
-/// - `style`: Visual or typographic style.
-/// - `text`: Text displayed by the generated annotation or label.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - structure-type (str): Structural annotation type to configure.
+/// - position (str, none): Track side or alignment position to target.
+/// - style (str, dictionary, none): Visual or typographic style.
+/// - text (str, content): Text displayed by the generated annotation or label.
+/// -> dictionary
 #let structure-appearance(format, structure-type, position, style, text) = _command("structure-appearance", (format: format, structure-type: structure-type, position: position, style: style, text: text))
 /// Use the first dssp column.
+/// -> dictionary
 #let use-first-dssp-column() = _command("use-first-dssp-column", (:))
 /// Use the second dssp column.
+/// -> dictionary
 #let use-second-dssp-column() = _command("use-second-dssp-column", (:))
 /// Create a stride track command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// -> dictionary
 #let stride-track(sequence, source) = _command("stride-track", (sequence: sequence, source: source))
 /// Create a dssp track command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// -> dictionary
 #let dssp-track(sequence, source) = _command("dssp-track", (sequence: sequence, source: source))
 /// Create a hmmtop track command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `source-sequence`: Sequence identifier represented by the annotation source.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - source-sequence (str, none): Sequence identifier represented by the annotation source.
+/// -> dictionary
 #let hmmtop-track(sequence, source, source-sequence: none) = _command("hmmtop-track", (sequence: sequence, source: source, source-sequence: source-sequence))
 /// Create a phd topology track command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// -> dictionary
 #let phd-topology-track(sequence, source) = _command("phd-topology-track", (sequence: sequence, source: source))
 /// Create a phd secondary track command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// -> dictionary
 #let phd-secondary-track(sequence, source) = _command("phd-secondary-track", (sequence: sequence, source: source))
 /// Create the low-level `consensus-from-sequence` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// -> dictionary
 #let consensus-from-sequence(sequence) = _command("consensus-from-sequence", (sequence: sequence))
 /// Create the low-level `consensus-from-all-sequences` configuration command.
+/// -> dictionary
 #let consensus-from-all-sequences() = _command("consensus-from-all-sequences", (:))
 /// Show leading gaps.
+/// -> dictionary
 #let show-leading-gaps() = _command("show-leading-gaps", (:))
 /// Hide leading gaps.
+/// -> dictionary
 #let hide-leading-gaps() = _command("hide-leading-gaps", (:))
 /// Create the low-level `shift-single-sequence` configuration command.
 ///
-/// - `args`: Additional positional or named options forwarded to the command.
+/// - args (arguments): Additional positional or named options forwarded to the command.
+/// -> dictionary
 #let shift-single-sequence(..args) = {
   let positional = args.pos()
   let value = if positional.len() > 0 { positional.first() } else { args.named().at("value", default: -1) }
   _command("shift-single-sequence", (value: value))
 }
 /// Create the low-level `keep-single-sequence-gaps` configuration command.
+/// -> dictionary
 #let keep-single-sequence-gaps() = _command("keep-single-sequence-gaps", (:))
 /// Hide residues.
+/// -> dictionary
 #let hide-residues() = _command("hide-residues", (:))
 /// Show residues.
+/// -> dictionary
 #let show-residues() = _command("show-residues", (:))
 /// Create the low-level `bar-graph-stretch` configuration command.
 ///
-/// - `value`: Value for this setting.
-/// - `position`: Track side or alignment position to target.
+/// - value (any): Value for this setting.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let bar-graph-stretch(value, position: none) = _command("bar-graph-stretch", (value: value, position: position))
 /// Create the low-level `color-scale-stretch` configuration command.
 ///
-/// - `value`: Value for this setting.
-/// - `position`: Track side or alignment position to target.
+/// - value (any): Value for this setting.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let color-scale-stretch(value, position: none) = _command("color-scale-stretch", (value: value, position: position))
 /// Create the low-level `alignment` configuration command.
 ///
-/// - `position`: Track side or alignment position to target.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let alignment(position) = _command("alignment", (position: position))
 /// Create the low-level `character-stretch` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let character-stretch(value) = _command("character-stretch", (value: value))
 /// Create the low-level `line-stretch` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let line-stretch(value) = _command("line-stretch", (value: value))
 /// Create the low-level `numbering-width` configuration command.
 ///
-/// - `digits`: Reserved width in decimal digits.
+/// - digits (int): Reserved width in decimal digits.
+/// -> dictionary
 #let numbering-width(digits) = _command("numbering-width", (digits: digits))
 /// Create the low-level `fingerprint` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let fingerprint(value) = _command("fingerprint", (value: value))
 /// Create the low-level `align-right-labels` configuration command.
+/// -> dictionary
 #let align-right-labels() = _command("align-right-labels", (:))
 /// Create the low-level `align-left-labels` configuration command.
+/// -> dictionary
 #let align-left-labels() = _command("align-left-labels", (:))
 /// Create the low-level `text-family` configuration command.
 ///
-/// - `target`: Alignment element or residue class to configure.
-/// - `family`: Font family.
+/// - target (str): Alignment element or residue class to configure.
+/// - family (str, array): Font family.
+/// -> dictionary
 #let text-family(target, family) = _command("text-family", (target: target, value: family))
 /// Create the low-level `text-weight` configuration command.
 ///
-/// - `target`: Alignment element or residue class to configure.
-/// - `weight`: Font weight.
+/// - target (str): Alignment element or residue class to configure.
+/// - weight (str, int): Font weight.
+/// -> dictionary
 #let text-weight(target, weight) = _command("text-weight", (target: target, value: weight))
 /// Create the low-level `text-posture` configuration command.
 ///
-/// - `target`: Alignment element or residue class to configure.
-/// - `posture`: Font posture.
+/// - target (str): Alignment element or residue class to configure.
+/// - posture (str): Font posture.
+/// -> dictionary
 #let text-posture(target, posture) = _command("text-posture", (target: target, value: posture))
 /// Create the low-level `text-size` configuration command.
 ///
-/// - `target`: Alignment element or residue class to configure.
-/// - `size`: Text size.
+/// - target (str): Alignment element or residue class to configure.
+/// - size (length): Text size.
+/// -> dictionary
 #let text-size(target, size) = _command("text-size", (target: target, value: size))
 /// Create the low-level `text-style` configuration command.
 ///
-/// - `target`: Alignment element or residue class to configure.
-/// - `family`: Font family.
-/// - `weight`: Font weight.
-/// - `posture`: Font posture.
-/// - `size`: Text size.
+/// - target (str): Alignment element or residue class to configure.
+/// - family (str, array): Font family.
+/// - weight (str, int): Font weight.
+/// - posture (str): Font posture.
+/// - size (length): Text size.
+/// -> dictionary
 #let text-style(target, family, weight, posture, size) = _command("text-style", (target: target, family: family, weight: weight, posture: posture, size: size))
 /// Create the low-level `caption` configuration command.
 ///
-/// - `text`: Text displayed by the generated annotation or label.
-/// - `position`: Track side or alignment position to target.
+/// - text (str, content): Text displayed by the generated annotation or label.
+/// - position (str, none): Track side or alignment position to target.
+/// -> dictionary
 #let caption(text, position: "bottom") = _command("caption", (text: text, position: position))
 /// Create the low-level `short-caption` configuration command.
 ///
-/// - `text`: Text displayed by the generated annotation or label.
+/// - text (str, content): Text displayed by the generated annotation or label.
+/// -> dictionary
 #let short-caption(text) = _command("short-caption", (text: text))
 /// Create the low-level `small-separator` configuration command.
+/// -> dictionary
 #let small-separator() = _command("separator-space", (value: 3pt))
 /// Create the low-level `medium-separator` configuration command.
+/// -> dictionary
 #let medium-separator() = _command("separator-space", (value: 6pt))
 /// Create the low-level `large-separator` configuration command.
+/// -> dictionary
 #let large-separator() = _command("separator-space", (value: 12pt))
 /// Create the low-level `export-consensus` configuration command.
 ///
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
-/// - `filename`: Path used to write the exported consensus.
-/// - `format`: Input format, or `auto` to detect it.
+/// - sequence (int, str): Sequence name, one-based index, or supported sequence selector.
+/// - filename (str): Path used to write the exported consensus.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// -> dictionary
 #let export-consensus(sequence, filename, format: "chimera") = _command("export-consensus", (sequence: sequence, filename: filename, format: format))
 /// Create a command from a PDB geometry selection.
 ///
-/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// -> dictionary
 #let pdb-selection(selection) = pdb-selection-list(selection)
 /// Disable block gap.
+/// -> dictionary
 #let no-block-gap() = _command("block-gap", (value: 0pt))
 /// Create the low-level `small-block-gap` configuration command.
+/// -> dictionary
 #let small-block-gap() = _command("block-gap-factor", (value: 1.0))
 /// Create the low-level `medium-block-gap` configuration command.
+/// -> dictionary
 #let medium-block-gap() = _command("block-gap-factor", (value: 1.5))
 /// Create the low-level `large-block-gap` configuration command.
+/// -> dictionary
 #let large-block-gap() = _command("block-gap-factor", (value: 2.0))
 /// Create the low-level `block-gap` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let block-gap(value) = _command("block-gap", (value: value))
 /// Create the low-level `flexible-block-gap` configuration command.
+/// -> dictionary
 #let flexible-block-gap() = _command("block-space-mode", (fixed: false))
 /// Create the low-level `fixed-block-gap` configuration command.
+/// -> dictionary
 #let fixed-block-gap() = _command("block-space-mode", (fixed: true))
 /// Disable line gap.
+/// -> dictionary
 #let no-line-gap() = _command("line-gap", (value: 0pt))
 /// Create the low-level `small-line-gap` configuration command.
+/// -> dictionary
 #let small-line-gap() = _command("line-gap", (value: 3pt))
 /// Create the low-level `medium-line-gap` configuration command.
+/// -> dictionary
 #let medium-line-gap() = _command("line-gap", (value: 6pt))
 /// Create the low-level `large-line-gap` configuration command.
+/// -> dictionary
 #let large-line-gap() = _command("line-gap", (value: 12pt))
 /// Create the low-level `line-gap` configuration command.
 ///
-/// - `value`: Value for this setting.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let line-gap(value) = _command("line-gap", (value: value))
 /// Create the low-level `feature-slot-space` configuration command.
 ///
-/// - `position`: Track side or alignment position to target.
-/// - `value`: Value for this setting.
+/// - position (str, none): Track side or alignment position to target.
+/// - value (any): Value for this setting.
+/// -> dictionary
 #let feature-slot-space(position, value) = _command("feature-slot-space", (position: position, value: value))
 
 #let _apply-command(config, command) = {

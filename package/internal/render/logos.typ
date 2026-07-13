@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Sequence-logo and legend rendering.
+/// Sequence-logo and legend rendering.
 
 #import "../model/logo.typ": _logo-column-items, _logo-max-bits, _logo-residue-color
 #import "../model/palette.typ": resolve-color

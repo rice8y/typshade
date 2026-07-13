@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Alignment and structural-annotation parsers.
+/// Alignment and structural-annotation parsers.
 
 #let _translate-case(text, from, to) = {
   let out = ""
@@ -164,7 +164,8 @@
 
 /// Parse an MSF alignment.
 ///
-/// - `text`: Text displayed by the generated annotation or label.
+/// - text (str, content): Text displayed by the generated annotation or label.
+/// -> dictionary
 #let parse-msf(text) = {
   let lines = _split-lines(text)
   let body = false
@@ -220,7 +221,8 @@
 
 /// Parse a CLUSTAL alignment.
 ///
-/// - `text`: Text displayed by the generated annotation or label.
+/// - text (str, content): Text displayed by the generated annotation or label.
+/// -> dictionary
 #let parse-aln(text) = {
   let lines = _split-lines(text)
   let pieces = (:)
@@ -249,7 +251,8 @@
 
 /// Parse a FASTA alignment.
 ///
-/// - `text`: Text displayed by the generated annotation or label.
+/// - text (str, content): Text displayed by the generated annotation or label.
+/// -> dictionary
 #let parse-fasta(text) = {
   let lines = _split-lines(text)
   let sequences = ()
@@ -302,8 +305,9 @@
 
 /// Read or parse an alignment with optional format detection.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `format`: Input format, or `auto` to detect it.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// -> dictionary
 #let read-alignment(source, format: auto) = {
   let text = _source-text(source)
   let detected = _detected-format(format, text)
@@ -318,7 +322,8 @@
 
 /// Read T-Coffee confidence scores.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// -> dictionary
 #let read-tcoffee(source) = {
   let data = (:)
   let lines = _split-lines(_source-text(source))
@@ -366,8 +371,9 @@
 
 /// Read an HMMTOP topology annotation.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `sequence`: Sequence name, one-based index, or supported sequence selector.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - sequence (int, str, none): Sequence name, one-based index, or supported sequence selector.
+/// -> dictionary
 #let read-hmmtop(source, sequence: none) = {
   let text = _source-text(source)
   if text.contains("Transmembrane helices:") {
@@ -410,7 +416,8 @@
 
 /// Read a PHD topology annotation.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// -> dictionary
 #let read-phd-topology(source) = {
   let runs = ""
   for line in _split-lines(_source-text(source)) {
@@ -429,7 +436,8 @@
 
 /// Read a PHD secondary-structure annotation.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// -> dictionary
 #let read-phd-secondary(source) = {
   let runs = ""
   for line in _split-lines(_source-text(source)) {
@@ -476,8 +484,9 @@
 
 /// Read a DSSP structural annotation.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `use-second-column`: Whether the second DSSP assignment column is used.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - use-second-column (bool): Whether the second DSSP assignment column is used.
+/// -> dictionary
 #let read-dssp(source, use-second-column: true) = {
   let entries = ()
   let started = false
@@ -521,7 +530,8 @@
 
 /// Read a STRIDE structural annotation.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// -> dictionary
 #let read-stride(source) = {
   let entries = ()
   for line in _split-lines(_source-text(source)) {

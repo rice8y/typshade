@@ -1,4 +1,4 @@
-//! Visual regression fixture covering the complete feature surface.
+/// Visual regression fixture covering the complete feature surface.
 
 #import "../package/lib.typ": *
 

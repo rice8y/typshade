@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Metric graph and color-scale rendering.
+/// Metric graph and color-scale rendering.
 
 #import "../engine/layout.typ": _empty-cell
 #import "../model/palette.typ": resolve-color, scale-color

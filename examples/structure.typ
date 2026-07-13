@@ -1,4 +1,4 @@
-//! Example demonstrating structural annotation tracks.
+/// Example demonstrating structural annotation tracks.
 
 #import "../package/lib.typ": shade, color-scheme, scoring-mode, ruler-track, structure-tracks
 

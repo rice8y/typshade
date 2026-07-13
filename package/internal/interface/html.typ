@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Target-aware table rendering for PDF and HTML export.
+/// Target-aware table rendering for PDF and HTML export.
 
 #let _table-style = "border-collapse:collapse;border:1px solid #c8c8c8;margin:0.35em 0;"
 #let _header-cell-style = "border:1px solid #c8c8c8;padding:0.25em 0.45em;text-align:left;vertical-align:top;font-weight:600;background:#f7f7f7;"
@@ -9,9 +9,10 @@
 
 /// Render tabular data appropriately for the active output target.
 ///
-/// - `pdf-table`: Typst table used for paged output.
-/// - `headers`: Header cells for the semantic HTML table.
-/// - `rows`: Body rows for the semantic HTML table.
+/// - pdf-table (content): Typst table used for paged output.
+/// - headers (array): Header cells for the semantic HTML table.
+/// - rows (array): Body rows for the semantic HTML table.
+/// -> content
 #let target-table(pdf-table, headers, rows) = context if target() == "html" {
   html.elem("table", attrs: (class: "typshade-data-table", style: _table-style))[
     #html.elem("thead")[

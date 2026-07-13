@@ -1,4 +1,4 @@
-//! Example demonstrating sequence and subfamily logos.
+/// Example demonstrating sequence and subfamily logos.
 
 #import "../package/lib.typ": shade, color-scheme, scoring-mode, no-consensus, sequence-logo, subfamily-logo
 

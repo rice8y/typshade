@@ -1,4 +1,4 @@
-//! Example demonstrating T-Coffee score shading.
+/// Example demonstrating T-Coffee score shading.
 
 #import "../package/lib.typ": shade, tcoffee-scores, ruler-track, consensus-track
 

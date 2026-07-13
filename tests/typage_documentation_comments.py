@@ -11,7 +11,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TYP_DIRS = (ROOT / "package", ROOT / "examples", ROOT / "docs", ROOT / "tests")
 PUBLIC_LET = re.compile(r"^#let\s+([A-Za-z][A-Za-z0-9-]*)")
-PARAM_DOC = re.compile(r"^\s*///\s+-\s+`?([A-Za-z][A-Za-z0-9-]*)`?(?:\s+\([^)]*\))?:")
+PARAM_DOC = re.compile(r"^/// - ([A-Za-z][A-Za-z0-9-]*) \(([^)]+)\):")
+RETURN_DOC = re.compile(r"^/// -> (.+)$")
+VALID_TYPES = {
+    "any", "content", "none", "auto", "bool", "boolean", "false", "true",
+    "int", "integer", "float", "length", "angle", "ratio", "relative",
+    "fraction", "str", "string", "color", "gradient", "pattern", "symbol",
+    "version", "bytes", "label", "datetime", "duration", "styles", "array",
+    "dictionary", "function", "arguments", "type", "module", "plugin",
+}
 
 
 def typ_files() -> list[Path]:
@@ -112,17 +120,30 @@ def parameter_names(signature: str, name: str) -> list[str]:
 def doc_lines_before(lines: list[str], declaration: int) -> list[str]:
     index = declaration - 1
     docs: list[str] = []
-    while index >= 0:
-        stripped = lines[index].strip()
-        if stripped.startswith("///"):
-            docs.append(lines[index])
-        elif stripped == "" or stripped.startswith("//"):
-            pass
-        else:
-            break
+    while index >= 0 and lines[index].startswith("///"):
+        docs.append(lines[index])
         index -= 1
     docs.reverse()
     return docs
+
+
+def module_doc_lines(lines: list[str]) -> list[str]:
+    index = 0
+    while index < len(lines) and (
+        not lines[index].strip()
+        or lines[index].startswith("//") and not lines[index].startswith("///")
+    ):
+        index += 1
+    docs: list[str] = []
+    while index < len(lines) and lines[index].startswith("///"):
+        docs.append(lines[index])
+        index += 1
+    return docs
+
+
+def valid_type_annotation(annotation: str) -> bool:
+    types = [item.strip() for item in annotation.split(",")]
+    return bool(types) and all(item in VALID_TYPES for item in types)
 
 
 def main() -> int:
@@ -134,8 +155,10 @@ def main() -> int:
     for path in files:
         lines = path.read_text(encoding="utf-8").splitlines()
         rel = path.relative_to(ROOT)
-        if not any(line.lstrip().startswith("//!") for line in lines):
-            failures.append(f"{rel}: missing top-level //! module documentation")
+        if not module_doc_lines(lines):
+            failures.append(f"{rel}: missing leading /// module documentation")
+        if any(line.startswith("//!") for line in lines):
+            failures.append(f"{rel}: legacy //! module documentation is not Tinymist-compliant")
 
         if not rel.parts or rel.parts[0] != "package":
             continue
@@ -151,16 +174,34 @@ def main() -> int:
                 failures.append(f"{rel}:{index + 1}: {name} is missing /// documentation")
                 continue
             summary = next((line.removeprefix("///").strip() for line in docs if line.removeprefix("///").strip()), "")
-            if not summary or summary.startswith("-"):
+            if not summary or summary.startswith("-") or summary.startswith("->"):
                 failures.append(f"{rel}:{index + 1}: {name} is missing a documentation summary")
 
-            documented = {found.group(1) for doc in docs if (found := PARAM_DOC.match(doc))}
+            documented: dict[str, str] = {}
+            for doc in docs:
+                if "/// - `" in doc:
+                    failures.append(f"{rel}:{index + 1}: {name} uses legacy Markdown-style parameter documentation")
+                if found := PARAM_DOC.match(doc):
+                    parameter, annotation = found.groups()
+                    documented[parameter] = annotation
+                    if not valid_type_annotation(annotation):
+                        failures.append(
+                            f"{rel}:{index + 1}: {name}.{parameter} has unsupported Tinymist type annotation {annotation!r}"
+                        )
             for parameter in parameter_names(signature, name):
                 parameters += 1
                 if parameter not in documented:
                     failures.append(
                         f"{rel}:{index + 1}: {name} is missing documentation for parameter {parameter}"
                     )
+
+            returns = [found.group(1) for doc in docs if (found := RETURN_DOC.match(doc))]
+            if len(returns) != 1:
+                failures.append(f"{rel}:{index + 1}: {name} must have exactly one /// -> return type")
+            elif not valid_type_annotation(returns[0]):
+                failures.append(
+                    f"{rel}:{index + 1}: {name} has unsupported Tinymist return type {returns[0]!r}"
+                )
 
     if failures:
         print("Typage documentation comment failures:", file=sys.stderr)
@@ -170,7 +211,7 @@ def main() -> int:
 
     print(
         f"OK: {len(files)} Typst modules, {symbols} public symbols, and "
-        f"{parameters} parameters have Typage documentation comments."
+        f"{parameters} parameters have strict Tinymist/Typage documentation comments."
     )
     return 0
 

@@ -1,4 +1,4 @@
-//! Example demonstrating declarative command composition.
+/// Example demonstrating declarative command composition.
 
 #import "../package/lib.typ": *
 

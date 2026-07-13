@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Primary alignment shading and figure-rendering interface.
+/// Primary alignment shading and figure-rendering interface.
 
 #import "../engine/config.typ" as _config
 #import "../engine/commands.typ" as _commands
@@ -34,30 +34,31 @@
 
 /// Render a configured multiple-sequence alignment.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `format`: Input format, or `auto` to detect it.
-/// - `figure`: Recipe value or concrete figure options to resolve.
-/// - `preset`: Preset name, preset dictionary, or `none`.
-/// - `theme`: Theme name, theme dictionary, or `none`.
-/// - `mode`: Shading mode, or `none` to keep the preset's mode.
-/// - `option`: Optional mode-specific value.
-/// - `seq-type`: Sequence type, or `auto` to use the parsed alignment type.
-/// - `residues-per-line`: Residues rendered in each alignment block.
-/// - `fit`: Automatic layout mode, boolean enablement, or layout dictionary.
-/// - `names`: Sequence-name visibility or position.
-/// - `numbering`: Sequence-number visibility or position.
-/// - `consensus`: Consensus-track visibility or position.
-/// - `ruler`: Ruler visibility or position.
-/// - `logo`: Logo configuration or enablement value.
-/// - `subfamily-logo`: Subfamily-logo visibility, position, or configuration.
-/// - `legend`: Legend visibility, color, or configuration.
-/// - `regions`: Region annotation commands applied to the alignment.
-/// - `features`: Feature-track commands applied to the alignment.
-/// - `commands`: Command values applied in order.
-/// - `caption`: Caption content associated with the rendered figure.
-/// - `short-caption`: Short caption metadata retained for compatibility.
-/// - `font`: Font family used for alignment text.
-/// - `font-size`: Font size used for alignment text.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - figure (array, dictionary): Recipe value or concrete figure options to resolve.
+/// - preset (str, dictionary, none): Preset name, preset dictionary, or `none`.
+/// - theme (str, dictionary, none): Theme name, theme dictionary, or `none`.
+/// - mode (str, none): Shading mode, or `none` to keep the preset's mode.
+/// - option (any): Optional mode-specific value.
+/// - seq-type (str, auto): Sequence type, or `auto` to use the parsed alignment type.
+/// - residues-per-line (int, auto, none): Residues rendered in each alignment block.
+/// - fit (str, bool, dictionary, none): Automatic layout mode, boolean enablement, or layout dictionary.
+/// - names (str, bool, dictionary, none): Sequence-name visibility or position.
+/// - numbering (str, bool, dictionary, none): Sequence-number visibility or position.
+/// - consensus (bool, str, dictionary, none): Consensus-track visibility or position.
+/// - ruler (str, bool, dictionary, none): Ruler visibility or position.
+/// - logo (str, bool, dictionary, auto, none): Logo configuration or enablement value.
+/// - subfamily-logo (bool, str, dictionary, none): Subfamily-logo visibility, position, or configuration.
+/// - legend (bool, str, dictionary, none): Legend visibility, color, or configuration.
+/// - regions (array, dictionary): Region annotation commands applied to the alignment.
+/// - features (array, dictionary): Feature-track commands applied to the alignment.
+/// - commands (array, dictionary): Command values applied in order.
+/// - caption (content, none): Caption content associated with the rendered figure.
+/// - short-caption (content, none): Short caption metadata retained for compatibility.
+/// - font (str, array, none): Font family used for alignment text.
+/// - font-size (length, none): Font size used for alignment text.
+/// -> content
 #let shade(
   source,
   format: auto,

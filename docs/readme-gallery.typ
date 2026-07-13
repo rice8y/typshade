@@ -1,4 +1,4 @@
-//! Gallery of representative Typshade renderings for the README.
+/// Gallery of representative Typshade renderings for the README.
 
 #import "../package/lib.typ": *
 

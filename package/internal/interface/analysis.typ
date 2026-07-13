@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Pairwise identity and similarity analysis helpers.
+/// Pairwise identity and similarity analysis helpers.
 
 #import "../engine/layout.typ" as _layout
 #import "../model/logo.typ" as _logo
@@ -109,13 +109,14 @@
 
 /// Calculate pairwise sequence identity over a selection.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `sequence-a`: First sequence name or one-based index.
-/// - `sequence-b`: Second sequence name or one-based index.
-/// - `format`: Input format, or `auto` to detect it.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `reference`: Reference sequence used to map residue positions.
-/// - `seq-type`: Sequence type, or `auto` to use the parsed alignment type.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - sequence-a (int, str): First sequence name or one-based index.
+/// - sequence-b (int, str): Second sequence name or one-based index.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - reference (int, str, auto): Reference sequence used to map residue positions.
+/// - seq-type (str, auto): Sequence type, or `auto` to use the parsed alignment type.
+/// -> float
 #let percent-identity(
   source,
   sequence-a,
@@ -131,15 +132,16 @@
 
 /// Calculate pairwise sequence similarity over a selection.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `sequence-a`: First sequence name or one-based index.
-/// - `sequence-b`: Second sequence name or one-based index.
-/// - `format`: Input format, or `auto` to detect it.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `reference`: Reference sequence used to map residue positions.
-/// - `seq-type`: Sequence type, or `auto` to use the parsed alignment type.
-/// - `similarities`: Optional residue-similarity mapping.
-/// - `groups`: Optional residue-group definitions.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - sequence-a (int, str): First sequence name or one-based index.
+/// - sequence-b (int, str): Second sequence name or one-based index.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - reference (int, str, auto): Reference sequence used to map residue positions.
+/// - seq-type (str, auto): Sequence type, or `auto` to use the parsed alignment type.
+/// - similarities (dictionary, none): Optional residue-similarity mapping.
+/// - groups (array, dictionary, none): Optional residue-group definitions.
+/// -> float
 #let percent-similarity(
   source,
   sequence-a,
@@ -167,13 +169,14 @@
 
 /// Render a pairwise identity and similarity matrix.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `format`: Input format, or `auto` to detect it.
-/// - `selection`: Residue range or Selection DSL expression to resolve.
-/// - `reference`: Reference sequence used to map residue positions.
-/// - `seq-type`: Sequence type, or `auto` to use the parsed alignment type.
-/// - `similarities`: Optional residue-similarity mapping.
-/// - `groups`: Optional residue-group definitions.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// - reference (int, str, auto): Reference sequence used to map residue positions.
+/// - seq-type (str, auto): Sequence type, or `auto` to use the parsed alignment type.
+/// - similarities (dictionary, none): Optional residue-similarity mapping.
+/// - groups (array, dictionary, none): Optional residue-group definitions.
+/// -> content
 #let similarity-table(
   source,
   format: auto,

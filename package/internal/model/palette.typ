@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Named colors, color scales, and biological residue palettes.
+/// Named colors, color scales, and biological residue palettes.
 
 #let _color-db = (
   Black: (0, 0, 0),
@@ -410,8 +410,9 @@
 
 /// Resolve a Typst color or a named Typshade color.
 ///
-/// - `value`: Value for this setting.
-/// - `default`: Default value used when no explicit override matches.
+/// - value (any): Value for this setting.
+/// - default (any): Default value used when no explicit override matches.
+/// -> color
 #let resolve-color(value, default: "Black") = {
   if value == none {
     return _rgb(_color-db.at(default))
@@ -438,8 +439,9 @@
 
 /// Sample a named color scale at a percentage value.
 ///
-/// - `name`: Name used by the generated command or rendered element.
-/// - `value`: Value for this setting.
+/// - name (str, none): Name used by the generated command or rendered element.
+/// - value (any): Value for this setting.
+/// -> color
 #let scale-color(name, value) = {
   let clamped = calc.max(0, calc.min(100, value))
   let key = _color-name(name)

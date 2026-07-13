@@ -1,4 +1,4 @@
-//! Pairwise combinatorial regression matrix for public features.
+/// Pairwise combinatorial regression matrix for public features.
 
 // Visual combinatorial test for Typshade feature families.
 //

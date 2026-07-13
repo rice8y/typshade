@@ -1,4 +1,4 @@
-//! Compile-time smoke coverage for the complete public API.
+/// Compile-time smoke coverage for the complete public API.
 
 #import "../package/lib.typ": *
 

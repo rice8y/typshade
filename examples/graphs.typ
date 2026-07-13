@@ -1,4 +1,4 @@
-//! Example demonstrating alignment metric graphs.
+/// Example demonstrating alignment metric graphs.
 
 #import "../package/lib.typ": shade, color-scheme, gap-style, graph, ruler-marker, ruler-track, scoring-mode
 

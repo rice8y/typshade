@@ -1,4 +1,4 @@
-//! Rendering coverage fixture for tracks, styles, and annotations.
+/// Rendering coverage fixture for tracks, styles, and annotations.
 
 #import "../package/lib.typ": *
 

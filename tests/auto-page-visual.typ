@@ -1,4 +1,4 @@
-//! Visual regression fixture for automatic pagination.
+/// Visual regression fixture for automatic pagination.
 
 #import "../package/lib.typ": *
 

@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Sequence-logo statistics, residue ordering, and color resolution.
+/// Sequence-logo statistics, residue ordering, and color resolution.
 
 #import "palette.typ": _default-logo-colors, _functional-presets, _logo-color-presets
 #import "parser.typ": _upper

@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! PDB parsing and geometry-based residue selection.
+/// PDB parsing and geometry-based residue selection.
 
 #import "parser.typ": _source-text, _split-lines, _upper
 
@@ -205,7 +205,8 @@
 
 /// Resolve a PDB geometry specification to residue numbers.
 ///
-/// - `selection`: Residue range or Selection DSL expression to resolve.
+/// - selection (str, dictionary): Residue range or Selection DSL expression to resolve.
+/// -> array
 #let pdb-selection-list(selection) = {
   let positions = _pdb-selection-positions(selection)
   if positions == none {

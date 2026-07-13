@@ -1,4 +1,4 @@
-//! Smoke fixture for semantic Typst HTML export.
+/// Smoke fixture for semantic Typst HTML export.
 
 #import "../package/lib.typ": *
 

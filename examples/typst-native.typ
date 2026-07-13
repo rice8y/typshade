@@ -1,4 +1,4 @@
-//! Example demonstrating Typst-native callbacks and styling.
+/// Example demonstrating Typst-native callbacks and styling.
 
 #import "../package/lib.typ": *
 

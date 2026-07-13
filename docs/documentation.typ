@@ -1,4 +1,4 @@
-//! Complete Typshade manual with executable examples and rendered results.
+/// Complete Typshade manual with executable examples and rendered results.
 
 #import "../package/lib.typ": *
 

@@ -1,4 +1,4 @@
-//! Visual parity fixture for TeXshade-compatible behavior.
+/// Visual parity fixture for TeXshade-compatible behavior.
 
 #import "../package/lib.typ": *
 

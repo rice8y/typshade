@@ -1,4 +1,4 @@
-//! Example demonstrating data-aware figure recipes.
+/// Example demonstrating data-aware figure recipes.
 
 #import "../package/lib.typ": *
 

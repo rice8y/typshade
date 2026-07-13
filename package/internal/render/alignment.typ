@@ -1,7 +1,7 @@
 // Copyright (C) 2026 Eito Yoneyama
 // SPDX-License-Identifier: GPL-2.0
 
-//! Paginated alignment rendering for PDF and HTML targets.
+/// Paginated alignment rendering for PDF and HTML targets.
 
 #import "../engine/config.typ": _apply-command, _default-config
 #import "features.typ": _bottom-feature-slots, _feature-rows, _ruler-rows, _top-feature-slots
@@ -1167,12 +1167,13 @@
 
 /// Render an alignment from low-level command values.
 ///
-/// - `source`: Input data, text, bytes, or a path accepted by the selected parser.
-/// - `format`: Input format, or `auto` to detect it.
-/// - `commands`: Command values applied in order.
-/// - `font`: Font family used for alignment text.
-/// - `font-size`: Font size used for alignment text.
-/// - `residues-per-line`: Residues rendered in each alignment block.
+/// - source (any): Input data, text, bytes, or a path accepted by the selected parser.
+/// - format (str, auto): Input format, or `auto` to detect it.
+/// - commands (array, dictionary): Command values applied in order.
+/// - font (str, array, none): Font family used for alignment text.
+/// - font-size (length, none): Font size used for alignment text.
+/// - residues-per-line (int, auto, none): Residues rendered in each alignment block.
+/// -> content
 #let render-alignment(source, format: auto, commands: (), font: none, font-size: none, residues-per-line: none) = {
   context {
     let config = _default-config()

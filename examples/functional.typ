@@ -1,4 +1,4 @@
-//! Example demonstrating functional residue shading.
+/// Example demonstrating functional residue shading.
 
 #import "../package/lib.typ": shade, consensus-track, legend-track, scoring-mode
 
