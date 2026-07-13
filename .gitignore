@@ -4,3 +4,5 @@
 .typage/
 public/
 typshade-docs/
+.vercel
+.env*
