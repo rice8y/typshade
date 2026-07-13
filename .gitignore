@@ -1,3 +1,6 @@
 .DS_Store
+.bin/
+.cache/
 .typage/
 public/
+typshade-docs/
